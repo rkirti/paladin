@@ -23,6 +23,7 @@
 
 #include "movement.h"
 #include "physics.h"
+#include "skybox.h"
 
 osg::ref_ptr<osg::Geode> createWall()
 {
@@ -102,6 +103,97 @@ void followTheModel(osgViewer::Viewer* viewer, osgCal::Model *model)
 
 }
 
+/*
+ * The keyboard handler: Every time an event happens, this class's 'handle'
+ * function is called. 
+ *
+ * Action taken: 
+ *      Key Press event:
+ *
+ *          Up arrow:          Start running animation 
+ *                             Instruct the rendered to increementing the
+ *                             postion of the model 
+ *
+ *          Left/Right Arrow:  Rotate the model 
+ *
+ *      Key Release event:
+ *
+ *          Up arrow:          Stop running animation 
+ *                             Instruct the renderer to stop increementing the
+ *                             postion of the model
+ */
+class AnimationToggleHandler : public osgGA::GUIEventHandler 
+{
+    public: 
+
+        AnimationToggleHandler( osgCal::Model* m, palladinPosition *palPosPtr)
+            : model( m )
+            , currentAnimation( -1 )
+        {
+            palPos = palPosPtr;
+        }
+        
+        bool handle(const osgGA::GUIEventAdapter& ea, osgGA::GUIActionAdapter& aa)
+        {
+            osgViewer::Viewer* viewer = dynamic_cast<osgViewer::Viewer*>(&aa);
+            if (!viewer) return false;
+    
+            switch(ea.getEventType())
+            {
+                case(osgGA::GUIEventAdapter::KEYDOWN):
+                {
+                    if ( ea.getKey() == osgGA::GUIEventAdapter::KEY_Up)
+                    {
+                        currentAnimation = '5'-'1';
+
+                        // model->blendCycle( currentAnimation, 1.0f, 0.0 );                        
+                        model->blendCycle( currentAnimation, 1.0f, 1.0 );                        
+
+                        // rigidModel->setLinearVelocity(btVector3(100*sin(currentAngle),-100*cos(currentAngle),0));
+                        palPos->startAdvance();
+                    }
+                    else if( ea.getKey() == osgGA::GUIEventAdapter::KEY_Left)
+                    {
+                        palPos->increementAngle();
+                        // currentAngle += 0.05;
+                        // rigidModel->setLinearVelocity(btVector3(100*sin(currentAngle),-100*cos(currentAngle),0));
+                    }
+                    else if( ea.getKey() == osgGA::GUIEventAdapter::KEY_Right)
+                    {
+                        /// currentAngle -= 0.05;
+                        // rigidModel->setLinearVelocity(btVector3(100*sin(currentAngle),-100*cos(currentAngle),0));
+                        palPos->decreementAngle();
+                    }
+
+                    break;
+
+                }
+                case(osgGA::GUIEventAdapter::KEYUP):
+                {
+                    if ( ea.getKey() == osgGA::GUIEventAdapter::KEY_Up)
+                    {
+                        // model->blendCycle( 0, 0.0f, 1.0 );                        
+                        model->clearCycle( currentAnimation, 0.0 ); // clear now
+                        currentAnimation = -1;
+
+                        // rigidModel->setLinearVelocity(btVector3(0,0,0));
+                        palPos->stopAdvance();
+                    }
+                }
+                default: break;
+            }
+        
+            return false;
+        }
+    
+    private:
+
+        osgCal::Model*              model;
+        // std::vector< std::string >  animationNames;
+        int                         currentAnimation;
+        palladinPosition *palPos;
+};
+
 int main(int argc, char** argv)
 {
     if(argc < 3)
@@ -126,6 +218,9 @@ int main(int argc, char** argv)
     // ( 100, -200, -100)
     osg::ref_ptr<osg::Geode> theWall = createWall();
     root->addChild(theWall);
+
+    root->addChild(createSkyBox());
+    // root->addChild(osgDB::readNodeFile("skydome.osg"));
 
     // Load the model
     osg::ref_ptr<osgCal::Model> model = createModel(argv[1]);
@@ -162,12 +257,7 @@ int main(int argc, char** argv)
     // pat->setUpdateCallback(new updatePalPos(&palPos));
 
     // Keyboard handler
-    viewer.addEventHandler( new AnimationToggleHandler( model, &palPos ) );
-
-    // Make the camera follow the model if the user asked for it
-    int followCamera = atoi(argv[2]);
-    if(followCamera)
-        followTheModel(&viewer, model);
+    viewer.addEventHandler( new AnimationToggleHandler( model , &palPos));
 
     // Add the scene graph to the viewer
     viewer.setSceneData(root);
@@ -179,7 +269,7 @@ int main(int argc, char** argv)
     createRigidModel(model);
 
     // Set up the pat updates
-    pat->setUpdateCallback(new ModelUpdateCallback(rigidModel));
+    pat->setUpdateCallback(new ModelUpdateCallback(rigidModel, &palPos));
 
     // root->setUpdateCallback(new RootUpdateCallback);
 
@@ -237,6 +327,15 @@ int main(int argc, char** argv)
 
     // add the screen capture handler
     viewer.addEventHandler(new osgViewer::ScreenCaptureHandler);
+
+    // Make the camera follow the model if the user asked for it
+    int followCamera = atoi(argv[2]);
+    if(followCamera)
+        followTheModel(&viewer, model);
+
+    // Set initial position of the camera
+    viewer.getCameraManipulator()->setHomePosition( osg::Vec3(0, 500, 200), osg::Vec3(0, 0, 200), osg::Vec3(0, 0, 1),  false );
+    viewer.home(); 
 
     // create the windows and run the threads.
     viewer.realize();

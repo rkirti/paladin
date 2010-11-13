@@ -26,54 +26,24 @@ btDynamicsWorld *m_dynamicsWorld;
 btRigidBody* rigidWall;
 btRigidBody* rigidModel;
 
-class RootUpdateCallback : public osg::NodeCallback
-{
-    public:
-        RootUpdateCallback()
-        {
-            frame_tick = osg::Timer::instance()->tick();
-        }
-        virtual void operator()(osg::Node* node, osg::NodeVisitor* nv)
-        {
-
-            // Physics update
-            osg::Timer_t now_tick = osg::Timer::instance()->tick();
-            float dt = osg::Timer::instance()->delta_s(frame_tick, now_tick);
-            frame_tick = now_tick;
-            /* int numSimSteps = */
-            m_dynamicsWorld->stepSimulation(dt); //, 10, 0.01);
-            m_dynamicsWorld->updateAabbs();
-
-
-            traverse(node, nv);
-        }
-
-        osg::Timer_t frame_tick; 
-};
-
 class ModelUpdateCallback: public osg::NodeCallback
 {
     private:
         btRigidBody *_body;
         bool print;
+        palladinPosition *palPos;
+        float currentAngle;
 
     public:
-        ModelUpdateCallback(btRigidBody *body) :
+        ModelUpdateCallback(btRigidBody *body, palladinPosition *palPosPtr) :
             _body(body)
     {
-             std::cout << _body->getLinearVelocity().x() << ", " << _body->getLinearVelocity().y() << ", " << _body->getLinearVelocity().z() << std::endl;
-             print = true;
+             palPos = palPosPtr;
     }
 
         virtual void operator()(osg::Node* node, osg::NodeVisitor* nv)
         {
             btScalar m[16];
-
-            if(print)
-            {
-             std::cout << "---" << _body->getLinearVelocity().x() << ", " << _body->getLinearVelocity().y() << ", " << _body->getLinearVelocity().z() << std::endl;
-             // print = false;
-            }
 
             btDefaultMotionState* myMotionState = (btDefaultMotionState*) _body->getMotionState();
             myMotionState->m_graphicsWorldTrans.getOpenGLMatrix(m);
@@ -84,16 +54,17 @@ class ModelUpdateCallback: public osg::NodeCallback
             pat->setPosition(mat.getTrans());
             pat->setAttitude(mat.getRotate());
 
-            // std::cout << mat.getTrans().x() << ", " << mat.getTrans().y() << ", " << mat.getTrans().z() << std::endl;
-            // std::cout << _body->getLinearVelocity().x() << ", " << _body->getLinearVelocity().y() << ", " << _body->getLinearVelocity().z() << std::endl;
-            
-            if(print)
+            osg::Vec3 axis(0,0,1);
+            osg::Quat att(palPos->currentAngle,axis);
+            pat->setAttitude(att);
+
+            if(palPos->advance)
             {
-             std::cout << "---" << _body->getLinearVelocity().x() << ", " << _body->getLinearVelocity().y() << ", " << _body->getLinearVelocity().z() << std::endl;
-             std::cout << mat.getTrans().x() << ", " << mat.getTrans().y() << ", " << mat.getTrans().z() << std::endl;
-             // _body->setLinearVelocity(btVector3(0, -1, 0));
-               print = false;
+                currentAngle = palPos->currentAngle;
+                rigidModel->setLinearVelocity(btVector3(100*sin(currentAngle),-100*cos(currentAngle),0));
             }
+            else
+                _body->setLinearVelocity(btVector3(0, 0, 0));
 
             traverse(node, nv);
         }
@@ -171,8 +142,6 @@ void createRigidModel(osg::ref_ptr<osgCal::Model> model)
 
     rigidModel->setActivationState(DISABLE_DEACTIVATION);
 
-    rigidModel->setLinearVelocity(btVector3(0,-100,0));
-    std::cout << rigidModel->getLinearVelocity().x() << ", " << rigidModel->getLinearVelocity().y() << ", " << rigidModel->getLinearVelocity().z() << std::endl;
     return;
 }
 
