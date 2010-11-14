@@ -21,10 +21,12 @@
 #include <osgGA/TerrainManipulator>
 
 #include <btBulletDynamicsCommon.h>
+#include <stdio.h>
 
 btDynamicsWorld *m_dynamicsWorld;
 btRigidBody* rigidWall;
 btRigidBody* rigidModel;
+bool movementDisallowed=false;
 
 class ModelUpdateCallback: public osg::NodeCallback
 {
@@ -136,7 +138,7 @@ void createRigidModel(osg::ref_ptr<osgCal::Model> model)
     btCollisionShape *cyl_shape = new btCylinderShapeZ(btVector3(10,10,100));
     btTransform trans; 
     trans.setIdentity();
-    trans.setOrigin(btVector3(0, 30,0)); 
+    trans.setOrigin(btVector3(0, 200,0)); 
     
     rigidModel = createRigidBody(m_dynamicsWorld,btScalar(100.f),trans,cyl_shape);
     rigidModel->setUserPointer(model); 
@@ -148,5 +150,49 @@ void createRigidModel(osg::ref_ptr<osgCal::Model> model)
     return;
 }
 
+
+void detectCollidingObjects()
+{
+    int numManifolds =  m_dynamicsWorld->getDispatcher()->getNumManifolds();
+	for (int i=0;i<numManifolds;i++)
+	{
+		btPersistentManifold* contactManifold = m_dynamicsWorld->getDispatcher()->getManifoldByIndexInternal(i);
+		btCollisionObject* obA = static_cast<btCollisionObject*>(contactManifold->getBody0());
+		btCollisionObject* obB = static_cast<btCollisionObject*>(contactManifold->getBody1());
+	
+        if ((obA == rigidWall || obB == rigidWall) && (obA == rigidWall || obB == rigidWall)) 
+        {
+            movementDisallowed = true;
+            std::cout << "Collision between model and wall detected" << std::endl;
+            std::cout << "Model coordinates are: " << rigidModel->getCenterOfMassPosition().x() << ","
+                << rigidModel->getCenterOfMassPosition().y() << ","
+                << rigidModel->getCenterOfMassPosition().z() << std::endl << std::endl;
+        }
+        else 
+        {
+            movementDisallowed = false;
+        }
+
+
+		int numContacts = contactManifold->getNumContacts();
+		for (int j=0;j<numContacts;j++)
+		{
+			btManifoldPoint& pt = contactManifold->getContactPoint(j);
+
+			glBegin(GL_LINES);
+			glColor3f(0, 0, 0);
+			
+			btVector3 ptA = pt.getPositionWorldOnA();
+			btVector3 ptB = pt.getPositionWorldOnB();
+
+			glVertex3d(ptA.x(),ptA.y(),ptA.z());
+			glVertex3d(ptB.x(),ptB.y(),ptB.z());
+			glEnd();
+		}
+    }
+
+
+
+}
 #endif /* ifndef PHYSICS_WORLD */
 

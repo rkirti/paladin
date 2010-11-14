@@ -26,6 +26,7 @@
 #include "skybox.h"
 #include "terrain.h"
 
+
 osg::ref_ptr<osg::Geode> createWall()
 {
     // Create an object to store geometry in.
@@ -356,7 +357,7 @@ int main(int argc, char** argv)
         /* int numSimSteps = */
         m_dynamicsWorld->stepSimulation(dt); //, 10, 0.01);
         m_dynamicsWorld->updateAabbs();
-        
+        detectCollidingObjects();
         // Print the model's motion info
         // std::cout << rigidModel->getLinearVelocity().x() << "," << rigidModel->getLinearVelocity().y() << "," << rigidModel->getLinearVelocity().z() << std::endl;
         // std::cout << rigidModel->getCenterOfMassPosition().x() << "," << rigidModel->getCenterOfMassPosition().y() << "," << rigidModel->getCenterOfMassPosition().z() << std::endl;
