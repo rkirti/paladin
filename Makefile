@@ -1,13 +1,15 @@
-all: demo 
 
-demo: main.cpp movement.h physics.h skybox.o hud.o
-	g++ main.cpp skybox.o hud.o -o demo -losg -losgDB -losgViewer -losgCal -losgUtil -losgViewer -lBulletDynamics -lBulletCollision -lLinearMath -I/usr/include/bullet -Wall -Werror
+CC = g++
+CFLAGS = -I/usr/include/bullet
+WFLAGS = -Wall 
+LDFLAGS = -losg -losgDB -losgViewer -losgCal -losgUtil -losgViewer -lBulletDynamics -lBulletCollision -lLinearMath
 
-skybox.o: skybox.cpp skybox.h
-	g++ -c skybox.cpp -o skybox.o
 
-hud.o: hud.cpp hud.h
-	g++ -c hud.cpp -o hud.o
+demo: main.cpp movement.h physics.o skybox.o hud.o osgdraw.o
+	g++ $^ -o $@  $(CFLAGS) $(LDFLAGS) $(WFLAGS)
+
+%.o:
+	gcc -c $*.cpp $(CFLAGS) $(LDFLAGS) $(WFLAGS)
 
 clean:
 	rm demo *.o

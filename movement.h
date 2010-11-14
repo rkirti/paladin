@@ -6,6 +6,10 @@
  *      of the model 
  */
 
+#ifndef MOVEMENT_H
+#define MOVEMENT_H
+
+
 extern bool movementAllowed;
 
 class palladinPosition
@@ -27,47 +31,5 @@ class palladinPosition
         bool advance;
 };
 
-/*
- * This class's 'operator()' is called everytime the Model is drawn. It reads
- * the coordinate info from a 'palladinPosition' class and positions the model
- * appropriately. 
- */
-/*
-class updatePalPos : public osg::NodeCallback {
-    public:
-        updatePalPos(palladinPosition *posPtr)
-        {
-            palPos = posPtr;
-            currentPosition.set(0.0, 0.0, 0.0);
-        }
 
-        virtual void operator()(osg::Node* node, osg::NodeVisitor* nv)
-        {
-            osg::PositionAttitudeTransform* pat = dynamic_cast<osg::PositionAttitudeTransform*> (node);
-            if(pat)
-            {
-                if(palPos->advance && movementAllowed)
-                {
-                    float currX = currentPosition.x();
-                    float currY = currentPosition.y();
-
-                    currentPosition.set(currX + 1*sin(palPos->currentAngle), currY - 1*cos(palPos->currentAngle), 0);
-
-                    pat->setPosition(currentPosition);
-                }
-
-                osg::Vec3 axis(0,0,1);
-                osg::Quat att(palPos->currentAngle,axis);
-                pat->setAttitude(att);
-
-            }
-            traverse(node, nv); 
-        }
-
-    protected:
-        palladinPosition *palPos;
-        osg::Vec3d currentPosition; 
-        osg::ref_ptr<osg::Camera> myCamera;
-        osg::ref_ptr<osgViewer::Viewer> myViewer; 
-};
-*/
+#endif 
