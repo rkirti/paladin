@@ -17,8 +17,8 @@ class palladinPosition
         void startAdvance(){advance = true;}
         void  stopAdvance(){advance = false;}
 
-        void increementAngle(){ currentAngle+=0.05;}
-        void decreementAngle(){ currentAngle-=0.05;}
+        void increementAngle(){ currentAngle+=0.02;}
+        void decreementAngle(){ currentAngle-=0.02;}
 
         float currentAngle; 
         bool advance;

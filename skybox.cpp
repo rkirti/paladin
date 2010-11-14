@@ -125,13 +125,16 @@ osg::Node* createSkyBox()
 
     // clear the depth to the far plane.
     osg::Depth* depth = new osg::Depth;
-    depth->setFunction(osg::Depth::ALWAYS);
+    // depth->setFunction(osg::Depth::ALWAYS);
+    depth->setFunction(osg::Depth::LEQUAL);
     depth->setRange(1.0,1.0);   
     stateset->setAttributeAndModes(depth, osg::StateAttribute::ON );
 
-    stateset->setRenderBinDetails(-1,"RenderBin");
+    // stateset->setRenderBinDetails(-1,"RenderBin");
+    stateset->setRenderBinDetails(1000,"RenderBin");
 
-    osg::Drawable* drawable = new osg::ShapeDrawable(new osg::Sphere(osg::Vec3(0.0f,0.0f,0.0f),1));
+    // osg::Drawable* drawable = new osg::ShapeDrawable(new osg::Sphere(osg::Vec3(0.0f,0.0f,0.0f),1));
+    osg::Drawable* drawable = new osg::ShapeDrawable(new osg::Sphere(osg::Vec3(0.0f,0.0f,0.0f),1000));
 
     osg::Geode* geode = new osg::Geode;
     geode->setCullingActive(false);

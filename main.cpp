@@ -24,6 +24,7 @@
 #include "movement.h"
 #include "physics.h"
 #include "skybox.h"
+#include "terrain.h"
 
 osg::ref_ptr<osg::Geode> createWall()
 {
@@ -211,6 +212,8 @@ int main(int argc, char** argv)
     // Create a root node for the scene graph
     osg::ref_ptr<osg::Group> root = new osg::Group;
 
+    root->addChild(createSkyBox());
+
     // Add the wall (in the y plane)
     // (-100, -200, -100)
     // (-100, -200,  100)
@@ -219,7 +222,10 @@ int main(int argc, char** argv)
     osg::ref_ptr<osg::Geode> theWall = createWall();
     root->addChild(theWall);
 
-    root->addChild(createSkyBox());
+    // osg::ref_ptr<osg::Geode> theFloor = createTerrain("../../bullet-test/data/grass.png");
+    osg::ref_ptr<osg::Group> theFloor = createTerrain("data/floor.png");
+    root->addChild(theFloor);
+
     // root->addChild(osgDB::readNodeFile("skydome.osg"));
 
     // Load the model
@@ -350,6 +356,10 @@ int main(int argc, char** argv)
         /* int numSimSteps = */
         m_dynamicsWorld->stepSimulation(dt); //, 10, 0.01);
         m_dynamicsWorld->updateAabbs();
+        
+        // Print the model's motion info
+        // std::cout << rigidModel->getLinearVelocity().x() << "," << rigidModel->getLinearVelocity().y() << "," << rigidModel->getLinearVelocity().z() << std::endl;
+        // std::cout << rigidModel->getCenterOfMassPosition().x() << "," << rigidModel->getCenterOfMassPosition().y() << "," << rigidModel->getCenterOfMassPosition().z() << std::endl;
 
         // render
         viewer.frame();

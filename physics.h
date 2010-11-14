@@ -112,18 +112,20 @@ btRigidBody* createRigidBody(btDynamicsWorld *world, float mass, const btTransfo
 void createRigidWall(osg::ref_ptr<osg::Geode> wall)
 {
     // Plane with normal along X axis and half-extent 100
-    btCollisionShape *wall_shape = new btStaticPlaneShape(btVector3(0,1, 0), 100);
+
+    // btCollisionShape *wall_shape = new btStaticPlaneShape(btVector3(0,1, 0), 100);
+    btCollisionShape *wall_shape = new btBoxShape(btVector3(500,10, 500));
 
     // Attach a rigid body 
     btVector3 pos;
-    pos.setValue(0,-275,0);
+    pos.setValue(0,0,0);
     btTransform trans;
     trans.setIdentity();
     trans.setOrigin(pos);
     btScalar mass = 0.f;
     rigidWall = createRigidBody(m_dynamicsWorld, mass, trans,wall_shape);
     rigidWall->setUserPointer(wall);
-    rigidWall->setCollisionFlags(rigidWall->getCollisionFlags() | btCollisionObject::CF_STATIC_OBJECT ); 
+    rigidWall->setCollisionFlags(rigidWall->getCollisionFlags() ); 
     rigidWall->setActivationState(DISABLE_DEACTIVATION);
     return;
 }
@@ -131,16 +133,17 @@ void createRigidWall(osg::ref_ptr<osg::Geode> wall)
 void createRigidModel(osg::ref_ptr<osgCal::Model> model)
 {
     // pat for the model is at (0,0,0)
-    btCollisionShape *cyl_shape = new btCylinderShapeZ(btVector3(0,0,0));
+    btCollisionShape *cyl_shape = new btCylinderShapeZ(btVector3(10,10,100));
     btTransform trans; 
     trans.setIdentity();
-    trans.setOrigin(btVector3(0,0,0)); 
+    trans.setOrigin(btVector3(0, 30,0)); 
     
     rigidModel = createRigidBody(m_dynamicsWorld,btScalar(100.f),trans,cyl_shape);
     rigidModel->setUserPointer(model); 
-    rigidModel->setCollisionFlags(rigidModel->getCollisionFlags() | btCollisionObject::CF_CHARACTER_OBJECT | btCollisionObject::CF_CUSTOM_MATERIAL_CALLBACK); 
+    rigidModel->setCollisionFlags(rigidModel->getCollisionFlags() | btCollisionObject::CF_CHARACTER_OBJECT ); 
 
     rigidModel->setActivationState(DISABLE_DEACTIVATION);
+
 
     return;
 }
