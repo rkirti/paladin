@@ -36,10 +36,10 @@ osg::ref_ptr<osg::Geode> createWall()
     osg::ref_ptr<osg::Vec3Array> v = new osg::Vec3Array;
     geom->setVertexArray( v.get() );
     float halfWidth = 100.0;
-    v->push_back( osg::Vec3( -halfWidth, -200.f, -halfWidth) );
-    v->push_back( osg::Vec3( -halfWidth, -200.f,  halfWidth) );
-    v->push_back( osg::Vec3(  halfWidth, -200.f,  halfWidth) );
-    v->push_back( osg::Vec3(  halfWidth, -200.f, -halfWidth) );
+    v->push_back( osg::Vec3( -halfWidth, 0.f, -halfWidth) );
+    v->push_back( osg::Vec3( -halfWidth, 0.f,  halfWidth) );
+    v->push_back( osg::Vec3(  halfWidth, 0.f,  halfWidth) );
+    v->push_back( osg::Vec3(  halfWidth, 0.f, -halfWidth) );
 
     // Create an array of four colors.
     osg::ref_ptr<osg::Vec4Array> c = new osg::Vec4Array;
@@ -152,6 +152,9 @@ class AnimationToggleHandler : public osgGA::GUIEventHandler
                         model->blendCycle( currentAnimation, 1.0f, 1.0 );                        
 
                         // rigidModel->setLinearVelocity(btVector3(100*sin(currentAngle),-100*cos(currentAngle),0));
+                        // [rkirti] Testing: Allow advance only if no collision
+                        // has happened
+                        // if (movementAllowed)
                         palPos->startAdvance();
                     }
                     else if( ea.getKey() == osgGA::GUIEventAdapter::KEY_Left)
@@ -273,7 +276,7 @@ int main(int argc, char** argv)
     // Physics
     createPhysicsWorld();
     createRigidWall(theWall);
-    createRigidModel(model);
+    createRigidModel(model,&palPos);
 
     // Set up the pat updates
     pat->setUpdateCallback(new ModelUpdateCallback(rigidModel, &palPos));
@@ -357,11 +360,13 @@ int main(int argc, char** argv)
         /* int numSimSteps = */
         m_dynamicsWorld->stepSimulation(dt); //, 10, 0.01);
         m_dynamicsWorld->updateAabbs();
-        detectCollidingObjects();
+        // [rkirti]Call moved to the node update callback
+        // detectCollidingObjects();
         // Print the model's motion info
-        // std::cout << rigidModel->getLinearVelocity().x() << "," << rigidModel->getLinearVelocity().y() << "," << rigidModel->getLinearVelocity().z() << std::endl;
-        // std::cout << rigidModel->getCenterOfMassPosition().x() << "," << rigidModel->getCenterOfMassPosition().y() << "," << rigidModel->getCenterOfMassPosition().z() << std::endl;
-
+        std::cout << rigidModel->getLinearVelocity().x() << "," << rigidModel->getLinearVelocity().y() << "," << rigidModel->getLinearVelocity().z() << std::endl;
+         std::cout << rigidModel->getCenterOfMassPosition().x() << "," << rigidModel->getCenterOfMassPosition().y() << "," << rigidModel->getCenterOfMassPosition().z() << std::endl;
+         std::cout << "Flags: " << palPos.advance << "," << movementAllowed << std::endl;
+         std::cout << "=======================" << std::endl;
         // render
         viewer.frame();
     }

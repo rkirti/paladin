@@ -5,6 +5,9 @@
  * The 'update' phase of the renderer reads the values and updates the position
  *      of the model 
  */
+
+extern bool movementAllowed;
+
 class palladinPosition
 {
     public:
@@ -29,6 +32,7 @@ class palladinPosition
  * the coordinate info from a 'palladinPosition' class and positions the model
  * appropriately. 
  */
+/*
 class updatePalPos : public osg::NodeCallback {
     public:
         updatePalPos(palladinPosition *posPtr)
@@ -42,7 +46,7 @@ class updatePalPos : public osg::NodeCallback {
             osg::PositionAttitudeTransform* pat = dynamic_cast<osg::PositionAttitudeTransform*> (node);
             if(pat)
             {
-                if(palPos->advance)
+                if(palPos->advance && movementAllowed)
                 {
                     float currX = currentPosition.x();
                     float currY = currentPosition.y();
@@ -66,4 +70,4 @@ class updatePalPos : public osg::NodeCallback {
         osg::ref_ptr<osg::Camera> myCamera;
         osg::ref_ptr<osgViewer::Viewer> myViewer; 
 };
-
+*/

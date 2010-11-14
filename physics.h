@@ -26,7 +26,10 @@
 btDynamicsWorld *m_dynamicsWorld;
 btRigidBody* rigidWall;
 btRigidBody* rigidModel;
-bool movementDisallowed=false;
+bool movementAllowed=true;
+// extern bool advance;
+
+void detectCollidingObjects();
 
 class ModelUpdateCallback: public osg::NodeCallback
 {
@@ -56,17 +59,40 @@ class ModelUpdateCallback: public osg::NodeCallback
             pat->setPosition(mat.getTrans());
             pat->setAttitude(mat.getRotate());
 
+            osg::Vec3 position = pat->getPosition();
+            std::cout << position.x() << " "<< position.y() << " "<< position.z() << " "<<  "\n";
+
+
             osg::Vec3 axis(0,0,1);
             osg::Quat att(palPos->currentAngle,axis);
             pat->setAttitude(att);
 
-            if(palPos->advance)
-            {
-                currentAngle = palPos->currentAngle;
+            currentAngle = palPos->currentAngle;
+
+            std::cout << "Calling detect\n" ;
+            detectCollidingObjects();
+
+            if(palPos->advance && movementAllowed)
                 rigidModel->setLinearVelocity(btVector3(100*sin(currentAngle),-100*cos(currentAngle),0));
-            }
-            else
+
+            else if(!palPos->advance && movementAllowed)
+                rigidModel->setLinearVelocity(btVector3(0, 0, 0));
+
+            else if(palPos->advance && !movementAllowed)
+                rigidModel->setLinearVelocity(btVector3(0, 100, 0));
+
+            else if(!palPos->advance && !movementAllowed)
+                rigidModel->setLinearVelocity(btVector3(0, 100, 0));
+
+            // Else: collision has happened => do nothing, let collision reset
+            // the vel. 
+            
+            /*
+            else if(!palPos->advance && !movementAllowed)
+
+            else if(palPos->advance && !movementAllowed)
                 _body->setLinearVelocity(btVector3(0, 0, 0));
+            */
 
             traverse(node, nv);
         }
@@ -116,7 +142,7 @@ void createRigidWall(osg::ref_ptr<osg::Geode> wall)
     // Plane with normal along X axis and half-extent 100
 
     // btCollisionShape *wall_shape = new btStaticPlaneShape(btVector3(0,1, 0), 100);
-    btCollisionShape *wall_shape = new btBoxShape(btVector3(500,10, 500));
+    btCollisionShape *wall_shape = new btBoxShape(btVector3(500,5, 500));
 
     // Attach a rigid body 
     btVector3 pos;
@@ -127,21 +153,21 @@ void createRigidWall(osg::ref_ptr<osg::Geode> wall)
     btScalar mass = 0.f;
     rigidWall = createRigidBody(m_dynamicsWorld, mass, trans,wall_shape);
     rigidWall->setUserPointer(wall);
-    rigidWall->setCollisionFlags(rigidWall->getCollisionFlags() ); 
+    rigidWall->setCollisionFlags(rigidWall->getCollisionFlags() | btCollisionObject::CF_STATIC_OBJECT); 
     rigidWall->setActivationState(DISABLE_DEACTIVATION);
     return;
 }
 
-void createRigidModel(osg::ref_ptr<osgCal::Model> model)
+void createRigidModel(osg::ref_ptr<osgCal::Model> model,palladinPosition* palPosPtr)
 {
     // pat for the model is at (0,0,0)
-    btCollisionShape *cyl_shape = new btCylinderShapeZ(btVector3(10,10,100));
+    btCollisionShape *cyl_shape = new btCylinderShapeZ(btVector3(2,2,100));
     btTransform trans; 
     trans.setIdentity();
     trans.setOrigin(btVector3(0, 200,0)); 
     
     rigidModel = createRigidBody(m_dynamicsWorld,btScalar(100.f),trans,cyl_shape);
-    rigidModel->setUserPointer(model); 
+    rigidModel->setUserPointer(palPosPtr); 
     rigidModel->setCollisionFlags(rigidModel->getCollisionFlags() | btCollisionObject::CF_CHARACTER_OBJECT ); 
 
     rigidModel->setActivationState(DISABLE_DEACTIVATION);
@@ -154,45 +180,37 @@ void createRigidModel(osg::ref_ptr<osgCal::Model> model)
 void detectCollidingObjects()
 {
     int numManifolds =  m_dynamicsWorld->getDispatcher()->getNumManifolds();
-	for (int i=0;i<numManifolds;i++)
-	{
-		btPersistentManifold* contactManifold = m_dynamicsWorld->getDispatcher()->getManifoldByIndexInternal(i);
-		btCollisionObject* obA = static_cast<btCollisionObject*>(contactManifold->getBody0());
-		btCollisionObject* obB = static_cast<btCollisionObject*>(contactManifold->getBody1());
-	
-        if ((obA == rigidWall || obB == rigidWall) && (obA == rigidWall || obB == rigidWall)) 
+    if(numManifolds == 0) movementAllowed = true;
+    else
+    {
+        for (int i=0;i<numManifolds;i++)
         {
-            movementDisallowed = true;
-            std::cout << "Collision between model and wall detected" << std::endl;
-            std::cout << "Model coordinates are: " << rigidModel->getCenterOfMassPosition().x() << ","
-                << rigidModel->getCenterOfMassPosition().y() << ","
-                << rigidModel->getCenterOfMassPosition().z() << std::endl << std::endl;
+            btPersistentManifold* contactManifold = m_dynamicsWorld->getDispatcher()->getManifoldByIndexInternal(i);
+            btCollisionObject* obA = static_cast<btCollisionObject*>(contactManifold->getBody0());
+            btCollisionObject* obB = static_cast<btCollisionObject*>(contactManifold->getBody1());
+
+            if ((obA == rigidWall && obB == rigidModel) || (obA == rigidModel && obB == rigidWall)) 
+            {
+                if (movementAllowed)
+                    std::cout  << "Disallowing movement now" << std::endl; 
+                movementAllowed = false;
+                // ((palladinPosition*) (rigidModel->getUserPointer()))->stopAdvance();
+                std::cout << "Collision between model and wall detected" << std::endl;
+                std::cout << "Model coordinates are: " << rigidModel->getCenterOfMassPosition().x() << ","
+                    << rigidModel->getCenterOfMassPosition().y() << ","
+                    << rigidModel->getCenterOfMassPosition().z() << std::endl << std::endl;
+            }
+            else 
+            {
+                if (!movementAllowed)
+                    std::cout  << "Allowing movement now" << std::endl; 
+                movementAllowed = true;
+            }
         }
-        else 
-        {
-            movementDisallowed = false;
-        }
-
-
-		int numContacts = contactManifold->getNumContacts();
-		for (int j=0;j<numContacts;j++)
-		{
-			btManifoldPoint& pt = contactManifold->getContactPoint(j);
-
-			glBegin(GL_LINES);
-			glColor3f(0, 0, 0);
-			
-			btVector3 ptA = pt.getPositionWorldOnA();
-			btVector3 ptB = pt.getPositionWorldOnB();
-
-			glVertex3d(ptA.x(),ptA.y(),ptA.z());
-			glVertex3d(ptB.x(),ptB.y(),ptB.z());
-			glEnd();
-		}
     }
-
-
-
 }
+
+
+
 #endif /* ifndef PHYSICS_WORLD */
 
