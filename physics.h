@@ -22,6 +22,8 @@
 
 #include <btBulletDynamicsCommon.h>
 #include <stdio.h>
+#include <stdlib.h>
+
 
 btDynamicsWorld *m_dynamicsWorld;
 btRigidBody* rigidWall;
@@ -30,6 +32,38 @@ bool movementAllowed=true;
 // extern bool advance;
 
 void detectCollidingObjects();
+
+void getModelDownCallback(btDynamicsWorld* world,btScalar timestep)
+{
+    btVector3 curVelocity(rigidModel->getLinearVelocity());
+    btVector3 currCoM(rigidModel->getCenterOfMassPosition());
+ 
+    std::cout << "Now in tick callback\n";
+
+    if ( (curVelocity.getZ() != 0)  | (currCoM.getZ() != 0))
+    {
+        std::cout << "Now trying to reduce z vel()\n";
+        if((curVelocity.getZ() > 0) | ( currCoM.getZ() > 1))
+        {
+            std::cout << "curr com : " << currCoM.getZ();
+            std::cout << "curr z vel: " << curVelocity.getZ() << "\n";
+            rigidModel->setLinearVelocity(btVector3(curVelocity.getX(), curVelocity.getY(),curVelocity.getZ() -10  ));
+        }
+        else if(currCoM.getZ() <= 1)
+             {
+            textOne->setText("In else");
+            rigidModel->setLinearVelocity(btVector3(curVelocity.getX(), curVelocity.getY(),0));
+            // rigidModel->setCenterOfMassPosition(btVector3(currCoM.getX(), currCoM.getY(),0 ));
+
+            currCoM.setZ(0);
+            btTransform transform;
+            transform.setIdentity();
+            transform.setOrigin(currCoM);
+            rigidModel->setWorldTransform(transform);
+        }   
+    }
+}
+
 
 class ModelUpdateCallback: public osg::NodeCallback
 {
@@ -72,17 +106,19 @@ class ModelUpdateCallback: public osg::NodeCallback
             std::cout << "Calling detect\n" ;
             detectCollidingObjects();
 
+            btScalar prevZVel = rigidModel->getLinearVelocity().getZ();
+            // Set LInear x and y
             if(palPos->advance && movementAllowed)
-                rigidModel->setLinearVelocity(btVector3(100*sin(currentAngle),-100*cos(currentAngle),0));
+                rigidModel->setLinearVelocity(btVector3(100*sin(currentAngle),-100*cos(currentAngle),prevZVel));
 
             else if(!palPos->advance && movementAllowed)
-                rigidModel->setLinearVelocity(btVector3(0, 0, 0));
+                rigidModel->setLinearVelocity(btVector3(0, 0, prevZVel));
 
             else if(palPos->advance && !movementAllowed)
-                rigidModel->setLinearVelocity(btVector3(0, 100, 0));
+                rigidModel->setLinearVelocity(btVector3(0, 100, prevZVel));
 
             else if(!palPos->advance && !movementAllowed)
-                rigidModel->setLinearVelocity(btVector3(0, 100, 0));
+                rigidModel->setLinearVelocity(btVector3(0, 100, prevZVel));
 
             // Else: collision has happened => do nothing, let collision reset
             // the vel. 
@@ -115,6 +151,9 @@ void createPhysicsWorld()
     
     // No gravity 
     m_dynamicsWorld->setGravity(btVector3(0, 0, 0));
+    
+    // Ugly hack to  get the jumping model come down
+    m_dynamicsWorld->setInternalTickCallback(getModelDownCallback, m_dynamicsWorld->getWorldUserInfo(),true);
     return;
 }
 
@@ -142,7 +181,7 @@ void createRigidWall(osg::ref_ptr<osg::Geode> wall)
     // Plane with normal along X axis and half-extent 100
 
     // btCollisionShape *wall_shape = new btStaticPlaneShape(btVector3(0,1, 0), 100);
-    btCollisionShape *wall_shape = new btBoxShape(btVector3(500,5, 500));
+    btCollisionShape *wall_shape = new btBoxShape(btVector3(100,5, 100));
 
     // Attach a rigid body 
     btVector3 pos;

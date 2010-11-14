@@ -19,12 +19,19 @@
 
 #include <osgGA/MatrixManipulator>
 #include <osgGA/KeySwitchMatrixManipulator>
+#include <osgText/Text>
 #include <osgGA/NodeTrackerManipulator>
+
+osgText::Text* textOne;
 
 #include "movement.h"
 #include "physics.h"
 #include "skybox.h"
 #include "terrain.h"
+
+#include "hud.h"
+
+
 
 
 osg::ref_ptr<osg::Geode> createWall()
@@ -159,7 +166,10 @@ class AnimationToggleHandler : public osgGA::GUIEventHandler
                     }
                     else if( ea.getKey() == osgGA::GUIEventAdapter::KEY_Left)
                     {
-                        palPos->increementAngle();
+                        // m_dynamicsWorld->setGravity(btVector3(0,0,-500));
+                        rigidModel->applyCentralImpulse(btVector3(0,0,20000));
+                        
+                       // palPos->increementAngle();
                         // currentAngle += 0.05;
                         // rigidModel->setLinearVelocity(btVector3(100*sin(currentAngle),-100*cos(currentAngle),0));
                     }
@@ -246,6 +256,8 @@ int main(int argc, char** argv)
 
     // Add pat to the root
     root->addChild(pat);
+
+    root->addChild(createHUD());
 
     /***** Scene graph created *********/
     /*
