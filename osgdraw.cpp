@@ -1,6 +1,14 @@
 #include "osgdraw.h"
 
 osg::ref_ptr<osg::Switch> powerUpSwitch; 
+osg::ref_ptr<osg::Geode> basicShapesGeode; 
+
+osg::ref_ptr<osg::Group> createWalls()
+{
+    osg::ref_ptr<Group> grp = new osg::Group;
+
+    retrn grp;
+}
 
 osg::ref_ptr<osg::Geode> createWall()
 {
@@ -81,12 +89,17 @@ void createTestPowerup()
     osg::ShapeDrawable* unitCubeDrawable = new osg::ShapeDrawable(unitCube);
 
     // Declare a instance of the geode class:
-    osg::Geode* basicShapesGeode = new osg::Geode();
+    basicShapesGeode = new osg::Geode();
 
     // Add the unit cube drawable to the geode:
     basicShapesGeode->addDrawable(unitCubeDrawable);
 
     powerUpSwitch->addChild(basicShapesGeode);
+}
+
+void disablePowerUp()
+{
+    powerUpSwitch->setChildValue(basicShapesGeode.get(), false);
 }
 
 void followTheModel(osgViewer::Viewer* viewer, osgCal::Model *model)
@@ -153,9 +166,9 @@ bool AnimationToggleHandler::handle(const osgGA::GUIEventAdapter& ea, osgGA::GUI
                 else if( ea.getKey() == osgGA::GUIEventAdapter::KEY_Left)
                 {
                     // m_dynamicsWorld->setGravity(btVector3(0,0,-500));
-                    rigidModel->applyCentralImpulse(btVector3(0,0,20000));
+                    // rigidModel->applyCentralImpulse(btVector3(0,0,20000));
 
-                    // palPos->increementAngle();
+                     palPos->increementAngle();
                     // currentAngle += 0.05;
                     // rigidModel->setLinearVelocity(btVector3(100*sin(currentAngle),-100*cos(currentAngle),0));
                 }

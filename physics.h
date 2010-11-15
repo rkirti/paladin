@@ -37,6 +37,7 @@ extern osgText::Text* textOne;
 
 void createPhysicsWorld();
 void createRigidWall(osg::ref_ptr<osg::Geode> wall);
+void createRigidBox(osg::ref_ptr<osg::Switch> box);
 void detectCollidingObjects();
 void createRigidModel(osg::ref_ptr<osgCal::Model> model,palladinPosition* palPosPtr);
 void detectCollidingObjects();

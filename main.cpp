@@ -118,6 +118,7 @@ int main(int argc, char** argv)
     createPhysicsWorld();
     createRigidWall(theWall);
     createRigidModel(model,&palPos);
+    createRigidBox(powerUpSwitch);
 
     // Set up the pat updates
     pat->setUpdateCallback(new ModelUpdateCallback(rigidModel, &palPos));

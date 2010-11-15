@@ -159,6 +159,7 @@ void createRigidModel(osg::ref_ptr<osgCal::Model> model,palladinPosition* palPos
 void detectCollidingObjects()
 {
     int numManifolds =  m_dynamicsWorld->getDispatcher()->getNumManifolds();
+    printf("%d\n",numManifolds);
     if(numManifolds == 0) movementAllowed = true;
     else
     {
@@ -167,6 +168,7 @@ void detectCollidingObjects()
             btPersistentManifold* contactManifold = m_dynamicsWorld->getDispatcher()->getManifoldByIndexInternal(i);
             btCollisionObject* obA = static_cast<btCollisionObject*>(contactManifold->getBody0());
             btCollisionObject* obB = static_cast<btCollisionObject*>(contactManifold->getBody1());
+            printf("%p   %p   %p   %p\n",obA,obB,rigidModel, rigidBox);
 
             if ((obA == rigidWall && obB == rigidModel) || (obA == rigidModel && obB == rigidWall)) 
             {
