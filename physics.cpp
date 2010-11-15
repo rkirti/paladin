@@ -1,9 +1,25 @@
 #include "physics.h"
+#include "osgdraw.h"
+
+enum collidertype{wall,booster};
+typedef enum collidertype colliderType;
 
 btDynamicsWorld *m_dynamicsWorld;
 btRigidBody* rigidWall;
+btRigidBody* rigidBox;
 btRigidBody* rigidModel;
 bool movementAllowed=true;
+
+
+class ColliderObject 
+{
+public: 
+        colliderType type;
+        osg::ref_ptr<osg::Switch> boosterCollider;
+        btBoxShape* wallShapeCollider;
+        //btVector3 getEffectiveNormal(btVector3 position);
+
+};
 
 void getModelDownCallback(btDynamicsWorld* world,btScalar timestep)
 {
@@ -99,6 +115,27 @@ void createRigidWall(osg::ref_ptr<osg::Geode> wall)
 }
 
 
+
+void createRigidBox(osg::ref_ptr<osg::Switch> box)
+{
+    btCollisionShape *box_shape = new btBoxShape(btVector3(25,25,25));
+
+    // Attach a rigid body 
+    btVector3 pos;
+    pos.setValue(50,50,50);
+    btTransform trans;
+    trans.setIdentity();
+    trans.setOrigin(pos);
+    btScalar mass = 0.f;
+    rigidBox = createRigidBody(m_dynamicsWorld, mass, trans,box_shape);
+    rigidBox->setUserPointer(box);
+    rigidBox->setCollisionFlags(rigidWall->getCollisionFlags() | btCollisionObject::CF_STATIC_OBJECT); 
+    return;
+}
+
+
+
+
 void createRigidModel(osg::ref_ptr<osgCal::Model> model,palladinPosition* palPosPtr)
 {
     // pat for the model is at (0,0,0)
@@ -142,6 +179,13 @@ void detectCollidingObjects()
                 if (!movementAllowed)
                     std::cout  << "Allowing movement now" << std::endl; 
                 movementAllowed = true;
+            }
+        
+            if ((obA == rigidBox && obB == rigidModel) || (obA == rigidModel && obB == rigidBox)) 
+            {
+                std::cout << "BLOWING UP THE BOX" << std::endl;
+                disablePowerUp();
+                 
             }
         }
     }
