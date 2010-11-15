@@ -6,6 +6,10 @@
 #include <osg/TexGen>
 #include <osg/Texture>
 
+#include <fstream>
+#include <iostream>
+
+using std::ifstream;
 
 osg::ref_ptr<osg::Switch> powerUpSwitch; 
 osg::ref_ptr<osg::Geode> basicShapesGeode; 
@@ -146,10 +150,25 @@ osg::ref_ptr<osg::Group> createWall(int comX, int comY, int halfWidth, int halfT
 osg::ref_ptr<osg::Group> createWalls()
 {
     osg::ref_ptr<osg::Group> grp = new osg::Group;
+    ifstream mazeFile;
+    mazeFile.open("./mazeFiles/maze-1.txt");
+    while (mazeFile.good())
+    {   
+        int CoMX,CoMY;
+        char dir;
+        int isXPointing;
 
-    grp->addChild(createWall(0,0,50,5,50,0));
-    grp->addChild(createWall(50,50,50,5,50,1));
-    grp->addChild(createWall(-50,50,50,5,50,1));
+        mazeFile >> CoMX >> CoMY >> dir;
+
+        std::cout << CoMX << CoMY << dir << "\n";
+        if (dir == 'X') isXPointing = 1;
+        else isXPointing = 0;
+
+        grp->addChild(createWall(400*CoMX, 1000*CoMY, 100, 10, 200, isXPointing));
+    }
+    // grp->addChild(createWall(0,0,50,5,50,0));
+    // grp->addChild(createWall(50,50,50,5,50,1));
+    // grp->addChild(createWall(-50,50,50,5,50,1));
 
     return grp;
 }
