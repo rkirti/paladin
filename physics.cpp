@@ -125,51 +125,6 @@ btRigidBody* createRigidWall(btVector3 centerOfMass,btVector3 halfExtents,NORMAL
     return rigidWall;
 }
 
-//
-//void createRigidWall(osg::ref_ptr<osg::Geode> wall)
-//{
-//    // Plane with normal along X axis and half-extent 100
-//
-//    // btCollisionShape *wall_shape = new btStaticPlaneShape(btVector3(0,1, 0), 100);
-//    btCollisionShape *wall_shape = new btBoxShape(btVector3(100,5, 100));
-//
-//    // Attach a rigid body 
-//    btVector3 pos;
-//    pos.setValue(0,0,0);
-//    btTransform trans;
-//    trans.setIdentity();
-//    trans.setOrigin(pos);
-//    btScalar mass = 0.f;
-//    rigidWall = createRigidBody(m_dynamicsWorld, mass, trans,wall_shape);
-//    rigidWall->setUserPointer(wall);
-//    rigidWall->setCollisionFlags(rigidWall->getCollisionFlags() | btCollisionObject::CF_STATIC_OBJECT); 
-//    rigidWall->setActivationState(DISABLE_DEACTIVATION);
-//    return;
-//}
-//
-
-
-/*
-void createRigidBox(osg::ref_ptr<osg::Switch> box)
-{
-    btCollisionShape *box_shape = new btBoxShape(btVector3(25,25,25));
-
-    // Attach a rigid body 
-    btVector3 pos;
-    pos.setValue(50,50,50);
-    btTransform trans;
-    trans.setIdentity();
-    trans.setOrigin(pos);
-    btScalar mass = 0.f;
-    rigidBox = createRigidBody(m_dynamicsWorld, mass, trans,box_shape);
-    rigidBox->setUserPointer(box);
-    rigidBox->setCollisionFlags(rigidWall->getCollisionFlags() | btCollisionObject::CF_STATIC_OBJECT); 
-    return;
-}
-*/
-
-
-
 
 void createRigidModel(osg::ref_ptr<osgCal::Model> model,palladinPosition* palPosPtr)
 {
