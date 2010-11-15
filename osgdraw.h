@@ -26,16 +26,17 @@
 #include <osgGA/NodeTrackerManipulator>
 
 #include <osg/ShapeDrawable>
+#include <osg/Group>
 
 #include "movement.h"
 #include "physics.h"
 
 
-osg::ref_ptr<osg::Geode> createWall();
+// osg::ref_ptr<osg::Geode> createWall();
 osg::ref_ptr<osgCal::Model> createModel(const std::string fileName);
 void followTheModel(osgViewer::Viewer* viewer, osgCal::Model *model);
 
-osg::ref_ptr<osg::Group> createWalls()
+osg::ref_ptr<osg::Group> createWalls();
 
 void createTestPowerup();
 void disablePowerUp();

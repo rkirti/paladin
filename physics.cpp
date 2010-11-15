@@ -1,8 +1,6 @@
 #include "physics.h"
 #include "osgdraw.h"
 
-enum collidertype{wall,booster};
-typedef enum collidertype colliderType;
 
 btDynamicsWorld *m_dynamicsWorld;
 btRigidBody* rigidWall;
@@ -10,16 +8,51 @@ btRigidBody* rigidBox;
 btRigidBody* rigidModel;
 bool movementAllowed=true;
 
+//enum collider_type{POWER_UP,WALL};
+//typedef enum collider_type COLLIDER_TYPE;
+//
+//enum normal_dirn{NORMAL_X,NORMAL_Y};
+//typedef enum normal_dirn NORMAL_DIRN;
 
-class ColliderObject 
-{
-public: 
-        colliderType type;
-        osg::ref_ptr<osg::Switch> boosterCollider;
-        btBoxShape* wallShapeCollider;
-        //btVector3 getEffectiveNormal(btVector3 position);
 
+/*
+ * [immanuel] :Moved to header file
+class ColliderInfo{
+    public:
+        // What is the object type - PowerUp or Wall ?
+        COLLIDER_TYPE type;
+        // Information for the wall 
+        btVector3 centerOfMass;
+        btVector3 normal;
+        // Information for the PowerUp
+        osg::ref_ptr<osg::Switch> powerUp;
+
+        ColliderInfo(btVector3 norm, btVector3 com) : centerOfMass(com), normal(norm)
+    {
+    }
+        ColliderInfo(osg::ref_ptr<osg::Switch> powerupInstance): powerUp(powerupInstance)
+    {
+    }
+        ~ColliderInfo();
+
+
+        // Function to be called if the type is POWER_UP
+        // TODO: Add powerup destroy function here    
+
+        // Function to be called if the type is WALL 
+        btVector3 getEffectiveNormal(btVector3 position)
+        {
+            btVector3 temp;
+            temp.setX( position.getX() - centerOfMass.getX() );
+            temp.setY( position.getY() - centerOfMass.getY() );
+            temp.setZ( position.getZ() - centerOfMass.getZ() );
+            if (normal.dot(temp) > 0)
+                return normal;
+            else return (-1)*normal;
+        }
 };
+*/
+
 
 void getModelDownCallback(btDynamicsWorld* world,btScalar timestep)
 {
@@ -35,7 +68,7 @@ void getModelDownCallback(btDynamicsWorld* world,btScalar timestep)
         }
         else if(currCoM.getZ() <= 1)
         {
-            textOne->setText("In else");
+           // textOne->setText("In else");
             rigidModel->setLinearVelocity(btVector3(curVelocity.getX(), curVelocity.getY(),0));
             // rigidModel->setCenterOfMassPosition(btVector3(currCoM.getX(), currCoM.getY(),0 ));
 
@@ -93,27 +126,50 @@ btRigidBody* createRigidBody(btDynamicsWorld *world, float mass, const btTransfo
 }
 
 
-void createRigidWall(osg::ref_ptr<osg::Geode> wall)
+btRigidBody* createRigidWall(btVector3 centerOfMass,btVector3 halfExtents,NORMAL_DIRN direction)
 {
-    // Plane with normal along X axis and half-extent 100
+    // Create a box shape with the given halfExtents
+    btCollisionShape* wall_shape = new btBoxShape(halfExtents);
 
-    // btCollisionShape *wall_shape = new btStaticPlaneShape(btVector3(0,1, 0), 100);
-    btCollisionShape *wall_shape = new btBoxShape(btVector3(100,5, 100));
-
-    // Attach a rigid body 
-    btVector3 pos;
-    pos.setValue(0,0,0);
+    // Create the rigid body
     btTransform trans;
+    trans.setOrigin(centerOfMass);
     trans.setIdentity();
-    trans.setOrigin(pos);
-    btScalar mass = 0.f;
-    rigidWall = createRigidBody(m_dynamicsWorld, mass, trans,wall_shape);
-    rigidWall->setUserPointer(wall);
+    btRigidBody* rigidWall = createRigidBody(m_dynamicsWorld,btScalar(0.f),trans, wall_shape);
+
+    // Set the wall info for collision
+    if (direction == NORMAL_X)
+        rigidWall->setUserPointer(new ColliderInfo(centerOfMass,btVector3(1,0, 0)));
+    else
+        rigidWall->setUserPointer(new ColliderInfo(centerOfMass,btVector3(0,1, 0)));
+    
     rigidWall->setCollisionFlags(rigidWall->getCollisionFlags() | btCollisionObject::CF_STATIC_OBJECT); 
     rigidWall->setActivationState(DISABLE_DEACTIVATION);
-    return;
+    return rigidWall;
 }
 
+//
+//void createRigidWall(osg::ref_ptr<osg::Geode> wall)
+//{
+//    // Plane with normal along X axis and half-extent 100
+//
+//    // btCollisionShape *wall_shape = new btStaticPlaneShape(btVector3(0,1, 0), 100);
+//    btCollisionShape *wall_shape = new btBoxShape(btVector3(100,5, 100));
+//
+//    // Attach a rigid body 
+//    btVector3 pos;
+//    pos.setValue(0,0,0);
+//    btTransform trans;
+//    trans.setIdentity();
+//    trans.setOrigin(pos);
+//    btScalar mass = 0.f;
+//    rigidWall = createRigidBody(m_dynamicsWorld, mass, trans,wall_shape);
+//    rigidWall->setUserPointer(wall);
+//    rigidWall->setCollisionFlags(rigidWall->getCollisionFlags() | btCollisionObject::CF_STATIC_OBJECT); 
+//    rigidWall->setActivationState(DISABLE_DEACTIVATION);
+//    return;
+//}
+//
 
 
 void createRigidBox(osg::ref_ptr<osg::Switch> box)
@@ -156,10 +212,11 @@ void createRigidModel(osg::ref_ptr<osgCal::Model> model,palladinPosition* palPos
 
 
 
-void detectCollidingObjects()
+void detectCollidingObjects(btVector3 comModel)
 {
     int numManifolds =  m_dynamicsWorld->getDispatcher()->getNumManifolds();
     printf("%d\n",numManifolds);
+    movementAllowed = true;
     if(numManifolds == 0) movementAllowed = true;
     else
     {
@@ -170,6 +227,23 @@ void detectCollidingObjects()
             btCollisionObject* obB = static_cast<btCollisionObject*>(contactManifold->getBody1());
             printf("%p   %p   %p   %p\n",obA,obB,rigidModel, rigidBox);
 
+            btCollisionObject* wall=NULL;
+            if(obA == rigidModel)
+            {
+                wall = obB;
+            }
+            else if(obB == rigidModel)
+            {
+                wall = obA;
+            }
+
+            if(wall != NULL)
+            {
+                movementAllowed = false;
+                // return (static_cast<ColliderInfo>(wall->getUserPointer()))->getEffectiveNormal(comModel);
+            }
+
+            /*
             if ((obA == rigidWall && obB == rigidModel) || (obA == rigidModel && obB == rigidWall)) 
             {
                 if (movementAllowed)
@@ -189,6 +263,7 @@ void detectCollidingObjects()
                 disablePowerUp();
                  
             }
+            */
         }
     }
 }

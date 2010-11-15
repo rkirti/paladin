@@ -27,6 +27,14 @@
 #include <stdlib.h>
 #include "movement.h"
 
+
+enum collider_type{POWER_UP,WALL};
+typedef enum collider_type COLLIDER_TYPE;
+
+enum normal_dirn{NORMAL_X,NORMAL_Y};
+typedef enum normal_dirn NORMAL_DIRN;
+
+
 extern btDynamicsWorld *m_dynamicsWorld;
 extern btRigidBody* rigidWall;
 extern btRigidBody* rigidModel;
@@ -36,15 +44,53 @@ extern osgText::Text* textOne;
 
 
 void createPhysicsWorld();
-void createRigidWall(osg::ref_ptr<osg::Geode> wall);
+btRigidBody* createRigidWall(btVector3 centerOfMass,btVector3 halfExtents,NORMAL_DIRN direction);
 void createRigidBox(osg::ref_ptr<osg::Switch> box);
-void detectCollidingObjects();
+
+void detectCollidingObjects(btVector3);
+
 void createRigidModel(osg::ref_ptr<osgCal::Model> model,palladinPosition* palPosPtr);
-void detectCollidingObjects();
+// void detectCollidingObjects();
 void getModelDownCallback(btDynamicsWorld* world,btScalar timestep);
 btRigidBody* createRigidBody(btDynamicsWorld *world, float mass, const btTransform& startTransform, btCollisionShape* shape);
 
 
+class ColliderInfo{
+    public:
+        // What is the object type - PowerUp or Wall ?
+        COLLIDER_TYPE type;
+        // Information for the wall 
+        btVector3 centerOfMass;
+        btVector3 normal;
+        // Information for the PowerUp
+        osg::ref_ptr<osg::Switch> powerUp;
+
+        ColliderInfo(btVector3 norm, btVector3 com) : centerOfMass(com), normal(norm)
+    {
+        type = WALL;
+    }
+        ColliderInfo(osg::ref_ptr<osg::Switch> powerupInstance): powerUp(powerupInstance)
+    {
+        type = POWER_UP;
+    }
+        ~ColliderInfo();
+
+
+        // Function to be called if the type is POWER_UP
+        // TODO: Add powerup destroy function here    
+
+        // Function to be called if the type is WALL 
+        btVector3 getEffectiveNormal(btVector3 position)
+        {
+            btVector3 temp;
+            temp.setX( position.getX() - centerOfMass.getX() );
+            temp.setY( position.getY() - centerOfMass.getY() );
+            temp.setZ( position.getZ() - centerOfMass.getZ() );
+            if (normal.dot(temp) > 0)
+                return normal;
+            else return (-1)*normal;
+        }
+};
 
 class ModelUpdateCallback: public osg::NodeCallback
 {
@@ -85,7 +131,8 @@ class ModelUpdateCallback: public osg::NodeCallback
             currentAngle = palPos->currentAngle;
 
             std::cout << "Calling detect\n" ;
-            detectCollidingObjects();
+            
+            // TODO: btVector3 velDirection = getEffectiveNormal(rigidModel->getCenterOfMassPosition());   
 
             btScalar prevZVel = rigidModel->getLinearVelocity().getZ();
             // Set LInear x and y
@@ -114,21 +161,6 @@ class ModelUpdateCallback: public osg::NodeCallback
             traverse(node, nv);
         }
 };
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 #endif /* ifndef PHYSICS_WORLD */
 

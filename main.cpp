@@ -22,15 +22,14 @@
 #include <osgText/Text>
 #include <osgGA/NodeTrackerManipulator>
 
-osgText::Text* textOne;
-
-#include "osgdraw.h"
 #include "movement.h"
 #include "physics.h"
 #include "skybox.h"
 #include "terrain.h"
 
 #include "hud.h"
+
+#include "osgdraw.h"
 
 extern osg::ref_ptr<osg::Switch> powerUpSwitch; 
 
@@ -59,8 +58,8 @@ int main(int argc, char** argv)
     // (-100, -200,  100)
     // ( 100, -200,  100)
     // ( 100, -200, -100)
-    osg::ref_ptr<osg::Geode> theWall = createWall();
-    root->addChild(theWall);
+    // osg::ref_ptr<osg::Geode> theWall = createWall();
+    // root->addChild(theWall);
 
     // osg::ref_ptr<osg::Geode> theFloor = createTerrain("../../bullet-test/data/grass.png");
     osg::ref_ptr<osg::Group> theFloor = createTerrain("data/floor.png");
@@ -86,7 +85,9 @@ int main(int argc, char** argv)
     // Add pat to the root
     root->addChild(pat);
 
-    root->addChild(createHUD());
+    //////////root->addChild(createHUD());
+    createPhysicsWorld();
+    root->addChild(createWalls());
 
     /***** Scene graph created *********/
     /*
@@ -115,8 +116,7 @@ int main(int argc, char** argv)
 
 
     // Physics
-    createPhysicsWorld();
-    createRigidWall(theWall);
+    rigidWall = createRigidWall(btVector3(0,0,0),btVector3(500,5,500),NORMAL_Y);
     createRigidModel(model,&palPos);
     createRigidBox(powerUpSwitch);
 

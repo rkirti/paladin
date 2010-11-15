@@ -1,15 +1,159 @@
 #include "osgdraw.h"
+#include "physics.h"
+
+#include <osg/TextureCubeMap>
+#include <osg/TexEnvCombine>
+#include <osg/TexGen>
+#include <osg/Texture>
+
 
 osg::ref_ptr<osg::Switch> powerUpSwitch; 
 osg::ref_ptr<osg::Geode> basicShapesGeode; 
 
-osg::ref_ptr<osg::Group> createWalls()
+osg::ref_ptr<osg::Geode> createSide(osg::ref_ptr<osg::Vec3Array> corners, osg::ref_ptr<osg::Vec3Array> normal, osg::ref_ptr<osg::Image> image)
 {
-    osg::ref_ptr<Group> grp = new osg::Group;
+    // Create an object to store geometry in.
+    osg::ref_ptr<osg::Geometry> geom = new osg::Geometry;
 
-    retrn grp;
+    // Create an array of four vertices.
+    // geom->setVertexArray( v.get() );
+    geom->setVertexArray( corners.get() );
+    // Create an array of four colors.
+
+    // Create an array for the single normal.
+    geom->setNormalArray( normal.get() );
+    geom->setNormalBinding( osg::Geometry::BIND_OVERALL );
+
+    // Draw a four-vertex quad from the stored data.
+    geom->addPrimitiveSet( new osg::DrawArrays( osg::PrimitiveSet::QUADS, 0, 4 ) );
+
+    // Add the Geometry (Drawable) to a Geode and
+    // return the Geode.
+    osg::ref_ptr<osg::Geode> geode = new osg::Geode;
+    geode->addDrawable( geom.get() );
+
+    osg::Vec2Array *mTexcoords = new osg::Vec2Array(8);
+   (*mTexcoords)[0].set(0.0f,0.0f);
+   (*mTexcoords)[1].set(2.0f,0.0f);
+   (*mTexcoords)[2].set(2.0f,2.0f);
+   (*mTexcoords)[3].set(0.0f,2.0f);
+
+   geom->setTexCoordArray(0,mTexcoords);
+    // Colors
+   osg::Texture2D* mHUDTexture = new osg::Texture2D;
+   mHUDTexture->setDataVariance(osg::Object::DYNAMIC);
+   mHUDTexture->setWrap(osg::Texture::WRAP_S, osg::Texture::REPEAT);
+   mHUDTexture->setWrap(osg::Texture::WRAP_T, osg::Texture::REPEAT); 
+   mHUDTexture->setImage(image.get());
+
+   osg::StateSet* HUDStateSet = new osg::StateSet();
+   geode->setStateSet(HUDStateSet);
+   HUDStateSet->setTextureAttributeAndModes(0,mHUDTexture,osg::StateAttribute::ON);
+
+    return geode;
+
 }
 
+osg::ref_ptr<osg::Group> createWall(int comX, int comY, int halfWidth, int halfThickness, int height, int isXPointing)
+{
+    int heX, heY;
+
+    osg::ref_ptr<osg::Group> wall = new osg::Group;
+
+    osg::ref_ptr<osg::Vec3Array> vertices;
+    osg::ref_ptr<osg::Vec3Array> normal;
+
+    NORMAL_DIRN direction;
+
+    if(isXPointing)
+    {
+        heX = halfThickness;
+        heY = halfWidth;
+        direction = NORMAL_X;
+    }
+    else
+    {
+        heY = halfThickness;
+        heX = halfWidth;
+        direction = NORMAL_Y;
+    }
+
+/////////btRigidBody* createRigidWall(btVector3 centerOfMass,btVector3 halfExtents,NORMAL_DIRN direction);
+    btVector3 centerOfMass(comX, comY, height/2);
+    btVector3 halfExtents(heX, heY, height/2);
+    createRigidWall(centerOfMass, halfExtents, direction);
+
+    // Pos Y face
+    vertices = new osg::Vec3Array;
+    vertices->push_back(osg::Vec3(comX + heX, comY + heY, 0)); 
+    vertices->push_back(osg::Vec3(comX - heX, comY + heY, 0));
+    vertices->push_back(osg::Vec3(comX - heX, comY + heY, height)); 
+    vertices->push_back(osg::Vec3(comX + heX, comY + heY, height));
+
+    normal = new osg::Vec3Array;
+    normal->push_back( osg::Vec3( 0.f, 1.f, 0.f ) );
+    wall->addChild(createSide(vertices, normal ,osgDB::readImageFile("./data/wall_light.TGA")));
+
+    // Neg Y face
+    vertices = new osg::Vec3Array;
+    vertices->push_back(osg::Vec3(comX - heX, comY - heY, 0)); 
+    vertices->push_back(osg::Vec3(comX + heX, comY - heY, 0));
+    vertices->push_back(osg::Vec3(comX + heX, comY - heY, height)); 
+    vertices->push_back(osg::Vec3(comX - heX, comY - heY, height));
+
+    normal = new osg::Vec3Array;
+    normal->push_back( osg::Vec3( 0.f, -1.f, 0.f ) );
+    wall->addChild(createSide(vertices, normal ,osgDB::readImageFile("./data/wall_light.TGA")));
+
+    // Top
+    vertices = new osg::Vec3Array;
+    vertices->push_back(osg::Vec3(comX - heX, comY - heY, height)); 
+    vertices->push_back(osg::Vec3(comX + heX, comY - heY, height));
+    vertices->push_back(osg::Vec3(comX + heX, comY + heY, height)); 
+    vertices->push_back(osg::Vec3(comX - heX, comY + heY, height));
+
+    normal = new osg::Vec3Array;
+    normal->push_back( osg::Vec3( 0.f, 0.f, 1.f ) );
+    wall->addChild(createSide(vertices, normal ,osgDB::readImageFile("./data/wall_light.TGA")));
+
+    // left 
+    vertices = new osg::Vec3Array;
+    vertices->push_back(osg::Vec3(comX + heX, comY - heY, 0)); 
+    vertices->push_back(osg::Vec3(comX + heX, comY + heY, 0));
+    vertices->push_back(osg::Vec3(comX + heX, comY + heY, height)); 
+    vertices->push_back(osg::Vec3(comX + heX, comY - heY, height));
+
+    normal = new osg::Vec3Array;
+    normal->push_back( osg::Vec3( 1.f, 0.f, 0.f ) );
+    wall->addChild(createSide(vertices, normal ,osgDB::readImageFile("./data/wall_light.TGA")));
+
+    // right
+    vertices = new osg::Vec3Array;
+    vertices->push_back(osg::Vec3(comX - heX, comY + heY, 0)); 
+    vertices->push_back(osg::Vec3(comX - heX, comY - heY, 0));
+    vertices->push_back(osg::Vec3(comX - heX, comY - heY, height)); 
+    vertices->push_back(osg::Vec3(comX - heX, comY + heY, height));
+
+    normal = new osg::Vec3Array;
+    normal->push_back( osg::Vec3(-1.f, 0.f, 0.f ) );
+    wall->addChild(createSide(vertices, normal ,osgDB::readImageFile("./data/wall_light.TGA")));
+
+    return wall;
+}
+
+// osg::ref_ptr<osg::Group> createWall(int comX, int comY, int halfWidth, int halfThickness, int height, int isXPointing)
+
+osg::ref_ptr<osg::Group> createWalls()
+{
+    osg::ref_ptr<osg::Group> grp = new osg::Group;
+
+    grp->addChild(createWall(0,0,50,5,50,0));
+    grp->addChild(createWall(50,50,50,5,50,1));
+    grp->addChild(createWall(-50,50,50,5,50,1));
+
+    return grp;
+}
+/*
 osg::ref_ptr<osg::Geode> createWall()
 {
     // Create an object to store geometry in.
@@ -48,6 +192,7 @@ osg::ref_ptr<osg::Geode> createWall()
     geode->addDrawable( geom.get() );
     return geode;
 }
+*/
 
 osg::ref_ptr<osgCal::Model> createModel(const std::string fileName)
 {
