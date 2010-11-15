@@ -1,5 +1,7 @@
 #include "osgdraw.h"
 
+osg::ref_ptr<osg::Switch> powerUpSwitch; 
+
 osg::ref_ptr<osg::Geode> createWall()
 {
     // Create an object to store geometry in.
@@ -57,6 +59,34 @@ osg::ref_ptr<osgCal::Model> createModel(const std::string fileName)
     model->load(coreModel.get(), meshAdder.get());   
 
     return model;
+}
+
+
+void createTestPowerup()
+{
+
+    powerUpSwitch = new osg::Switch; 
+
+    // Declare a box class (derived from shape class) instance
+    // This constructor takes an osg::Vec3 to define the center
+    // and a float to define the height, width and depth.
+    // (an overloaded constructor allows you to specify unique
+    // height, width and height values.)
+    osg::Box* unitCube = new osg::Box( osg::Vec3(50,50,50),50.0f);
+
+    // Declare an instance of the shape drawable class and initialize
+    // it with the unitCube shape we created above.
+    // This class is derived from 'drawable' so instances of this
+    // class can be added to Geode instances.
+    osg::ShapeDrawable* unitCubeDrawable = new osg::ShapeDrawable(unitCube);
+
+    // Declare a instance of the geode class:
+    osg::Geode* basicShapesGeode = new osg::Geode();
+
+    // Add the unit cube drawable to the geode:
+    basicShapesGeode->addDrawable(unitCubeDrawable);
+
+    powerUpSwitch->addChild(basicShapesGeode);
 }
 
 void followTheModel(osgViewer::Viewer* viewer, osgCal::Model *model)

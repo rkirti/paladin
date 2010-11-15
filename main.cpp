@@ -32,6 +32,7 @@ osgText::Text* textOne;
 
 #include "hud.h"
 
+extern osg::ref_ptr<osg::Switch> powerUpSwitch; 
 
 
 int main(int argc, char** argv)
@@ -65,6 +66,9 @@ int main(int argc, char** argv)
     osg::ref_ptr<osg::Group> theFloor = createTerrain("data/floor.png");
     root->addChild(theFloor);
 
+
+    createTestPowerup();
+    root->addChild(powerUpSwitch);
     // root->addChild(osgDB::readNodeFile("skydome.osg"));
 
     // Load the model

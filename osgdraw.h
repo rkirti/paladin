@@ -25,6 +25,8 @@
 #include <osgText/Text>
 #include <osgGA/NodeTrackerManipulator>
 
+#include <osg/ShapeDrawable>
+
 #include "movement.h"
 #include "physics.h"
 
@@ -33,6 +35,8 @@ osg::ref_ptr<osg::Geode> createWall();
 osg::ref_ptr<osgCal::Model> createModel(const std::string fileName);
 void followTheModel(osgViewer::Viewer* viewer, osgCal::Model *model);
 
+
+void createTestPowerup();
 
 class AnimationToggleHandler : public osgGA::GUIEventHandler 
 {
