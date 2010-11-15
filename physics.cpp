@@ -96,8 +96,9 @@ btRigidBody* createRigidWall(btVector3 centerOfMass,btVector3 halfExtents,NORMAL
 
     // Create the rigid body
     btTransform trans;
-    trans.setOrigin(centerOfMass);
     trans.setIdentity();
+    trans.setOrigin(centerOfMass);
+    // trans.setOrigin(btVector3(-200, 200, 100));
     btRigidBody* rigidWall = createRigidBody(m_dynamicsWorld,btScalar(0.f),trans, wall_shape);
 
     // Set the wall info for collision
@@ -108,6 +109,9 @@ btRigidBody* createRigidWall(btVector3 centerOfMass,btVector3 halfExtents,NORMAL
     
     rigidWall->setCollisionFlags(rigidWall->getCollisionFlags() | btCollisionObject::CF_STATIC_OBJECT); 
     rigidWall->setActivationState(DISABLE_DEACTIVATION);
+
+    std::cout <<"))))))))))))))))))))))))))))" << (static_cast<btBoxShape*>(wall_shape))->getHalfExtentsWithMargin().getX() << ", "<< (static_cast<btBoxShape*>(wall_shape))->getHalfExtentsWithMargin().getY() << ", "<< (static_cast<btBoxShape*>(wall_shape))->getHalfExtentsWithMargin().getZ() << "\n";
+
     return rigidWall;
 }
 
@@ -182,6 +186,7 @@ btVector3 detectCollidingObjects()
     int numManifolds =  m_dynamicsWorld->getDispatcher()->getNumManifolds();
 
 
+    std::cout << "NNNNNNNNNNNum of manifolds " << numManifolds << "\n";
     if(numManifolds == 0) 
         return btVector3(0,0,0);
     else
@@ -199,6 +204,11 @@ btVector3 detectCollidingObjects()
             // Get the other colliding body
             if (obA == rigidModel) 
             {
+                btBoxShape *box = static_cast<btBoxShape*>((static_cast<btCollisionObject*>(obB))->getCollisionShape());
+                std::cout<< ")))))))))))))" << box->getHalfExtentsWithMargin().getX() << ", " << box->getHalfExtentsWithMargin().getY() << ", " << box->getHalfExtentsWithMargin().getZ() << "\n";
+
+                std::cout<< "&&&&&&&&&&&&" << obB->getCenterOfMassPosition().getX() << ", " << obB->getCenterOfMassPosition().getY() << ", " << obB->getCenterOfMassPosition().getZ() << "\n";
+
                 std::cout << "Collision detected\n";
                 printf("colliding object: %p Wall: %p\n",obB,tempWall);
                 if ( ((ColliderInfo*)(obB->getUserPointer()))->type == WALL ) 
@@ -212,6 +222,11 @@ btVector3 detectCollidingObjects()
             }
             else if (obB == rigidModel)
             {
+                btBoxShape *box = static_cast<btBoxShape*>((static_cast<btCollisionObject*>(obA))->getCollisionShape());
+                std::cout<< ")))))))))))))" << box->getHalfExtentsWithMargin().getX() << ", " << box->getHalfExtentsWithMargin().getY() << ", " << box->getHalfExtentsWithMargin().getZ() << "\n";
+
+                std::cout<< "&&&&&&&&&&&&" << obA->getCenterOfMassPosition().getX() << ", " << obA->getCenterOfMassPosition().getY() << ", " << obA->getCenterOfMassPosition().getZ() << "\n";
+
                 std::cout << "Collision detected\n";
                 printf("colliding object: %p Wall: %p\n",obA,tempWall);
                 if ( ((ColliderInfo*)(obA->getUserPointer()))->type == WALL ) 

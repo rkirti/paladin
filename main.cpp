@@ -51,26 +51,14 @@ int main(int argc, char** argv)
     // Create a root node for the scene graph
     osg::ref_ptr<osg::Group> root = new osg::Group;
 
+    // Skybox
     root->addChild(createSkyBox());
 
-    // Add the wall (in the y plane)
-    // (-100, -200, -100)
-    // (-100, -200,  100)
-    // ( 100, -200,  100)
-    // ( 100, -200, -100)
-    // osg::ref_ptr<osg::Geode> theWall = createWall();
-    // root->addChild(theWall);
-
-    // osg::ref_ptr<osg::Geode> theFloor = createTerrain("../../bullet-test/data/grass.png");
+    // Terrain
     osg::ref_ptr<osg::Group> theFloor = createTerrain("data/floor.png");
     root->addChild(theFloor);
 
-
-    //createTestPowerup();
-    //root->addChild(powerUpSwitch);
-    // root->addChild(osgDB::readNodeFile("skydome.osg"));
-
-    // Load the model
+    // Model
     osg::ref_ptr<osgCal::Model> model = createModel(argv[1]);
 
     // Create a PAT which helps in moving the model around
@@ -85,46 +73,28 @@ int main(int argc, char** argv)
     // Add pat to the root
     root->addChild(pat);
 
-    //////////root->addChild(createHUD());
+    // init physics
     createPhysicsWorld();
-    root->addChild(createWalls());
-
-    /***** Scene graph created *********/
-    /*
-     * root (Group)
-     * |
-     * L----> wall (Geode, which contains a Geometry)
-     * |
-     * L----> pat (PositionAttitudeTransform)
-     *        |
-     *        L----> model (Model)
-     */
 
     // interface between the keyboard handler and the update callback
     palladinPosition palPos;
 
-    // Each time the PAT is rendered, check 'palPos' contents to see the
-    // position of the model  
-    // Moved to later-  when the rigid body for the paladin is setup 
-    // pat->setUpdateCallback(new updatePalPos(&palPos));
+    // Rigid bodies
+    root->addChild(createWalls());
+    createRigidModel(model,&palPos);
 
+    //createTestPowerup();
+    //root->addChild(powerUpSwitch);
+    //root->addChild(createHUD());
+    
     // Keyboard handler
     viewer.addEventHandler( new AnimationToggleHandler( model , &palPos));
 
     // Add the scene graph to the viewer
     viewer.setSceneData(root);
 
-
-    // Physics
-    // rigidWall = createRigidWall(btVector3(0,0,0),btVector3(500,5,500),NORMAL_Y);
-    createRigidModel(model,&palPos);
-    //createRigidBox(powerUpSwitch);
-
     // Set up the pat updates
     pat->setUpdateCallback(new ModelUpdateCallback(rigidModel, &palPos));
-
-    // root->setUpdateCallback(new RootUpdateCallback);
-
 
     // Start the show
     // viewer.run();

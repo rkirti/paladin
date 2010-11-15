@@ -174,9 +174,9 @@ osg::ref_ptr<osg::Group> createWalls()
     }
     */
 
-    // grp->addChild(createWall(0,0,100,5,200,0));
-    // grp->addChild(createWall(200,200,200,5,200,1));
-    grp->addChild(createWall(-200,200,200,5,200,0));
+    grp->addChild(createWall(0,0,100,5,200,0));
+    grp->addChild(createWall(200,200,200,5,200,1));
+    grp->addChild(createWall(-200,200,200,5,200,1));
 
     return grp;
 }
