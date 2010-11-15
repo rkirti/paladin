@@ -8,6 +8,8 @@ btRigidBody* rigidBox;
 btRigidBody* rigidModel;
 bool movementAllowed=true;
 
+extern btRigidBody* tempWall;
+
 void getModelDownCallback(btDynamicsWorld* world,btScalar timestep)
 {
     btVector3 curVelocity(rigidModel->getLinearVelocity());
@@ -74,6 +76,7 @@ btRigidBody* createRigidBody(btDynamicsWorld *world, float mass, const btTransfo
     btDefaultMotionState* myMotionState = new btDefaultMotionState(startTransform);
     btRigidBody* body = new btRigidBody(mass, myMotionState, shape, localInertia);
     
+    std::cout << "*************** From Rigid body *************" ;
     // myMotionState->setRigidBody(body);
     world->addRigidBody(body);
     return body;
@@ -82,6 +85,12 @@ btRigidBody* createRigidBody(btDynamicsWorld *world, float mass, const btTransfo
 
 btRigidBody* createRigidWall(btVector3 centerOfMass,btVector3 halfExtents,NORMAL_DIRN direction)
 {
+    std::cout << "====Half extents given for collision shape: ";
+    std::cout << halfExtents.getX() << "," << halfExtents.getY() << ","  << halfExtents.getZ() << "\n";
+    std::cout << "====Center of Mass given for collision shape: ";
+    std::cout << centerOfMass.getX() << "," << centerOfMass.getY() << ","  << centerOfMass.getZ() << "\n";
+
+
     // Create a box shape with the given halfExtents
     btCollisionShape* wall_shape = new btBoxShape(halfExtents);
 
@@ -126,6 +135,7 @@ btRigidBody* createRigidWall(btVector3 centerOfMass,btVector3 halfExtents,NORMAL
 //
 
 
+/*
 void createRigidBox(osg::ref_ptr<osg::Switch> box)
 {
     btCollisionShape *box_shape = new btBoxShape(btVector3(25,25,25));
@@ -142,6 +152,7 @@ void createRigidBox(osg::ref_ptr<osg::Switch> box)
     rigidBox->setCollisionFlags(rigidWall->getCollisionFlags() | btCollisionObject::CF_STATIC_OBJECT); 
     return;
 }
+*/
 
 
 
@@ -166,13 +177,13 @@ void createRigidModel(osg::ref_ptr<osgCal::Model> model,palladinPosition* palPos
 
 
 
-btVector3 detectCollidingObjects(btVector3 comModel)
+btVector3 detectCollidingObjects()
 {
     int numManifolds =  m_dynamicsWorld->getDispatcher()->getNumManifolds();
-    printf("%d\n",numManifolds);
-    movementAllowed = true;
+
+
     if(numManifolds == 0) 
-        movementAllowed = true;
+        return btVector3(0,0,0);
     else
     {
         for (int i=0;i<numManifolds;i++)
@@ -188,6 +199,8 @@ btVector3 detectCollidingObjects(btVector3 comModel)
             // Get the other colliding body
             if (obA == rigidModel) 
             {
+                std::cout << "Collision detected\n";
+                printf("colliding object: %p Wall: %p\n",obB,tempWall);
                 if ( ((ColliderInfo*)(obB->getUserPointer()))->type == WALL ) 
                     return   ((ColliderInfo*)(obB->getUserPointer()))->getEffectiveNormal(rigidModel->getCenterOfMassPosition());
                 else if ( ((ColliderInfo*)(obB->getUserPointer()))->type == POWER_UP ) 
@@ -199,6 +212,8 @@ btVector3 detectCollidingObjects(btVector3 comModel)
             }
             else if (obB == rigidModel)
             {
+                std::cout << "Collision detected\n";
+                printf("colliding object: %p Wall: %p\n",obA,tempWall);
                 if ( ((ColliderInfo*)(obA->getUserPointer()))->type == WALL ) 
                     return   ((ColliderInfo*)(obA->getUserPointer()))->getEffectiveNormal(rigidModel->getCenterOfMassPosition());
                 else if ( ((ColliderInfo*)(obA->getUserPointer()))->type == POWER_UP ) 
@@ -207,17 +222,10 @@ btVector3 detectCollidingObjects(btVector3 comModel)
                     // Call function to destroy the powerup and increment points
                     return btVector3(0,0,0);
                 }
-
-
-
-
-
             }
-
-
-
-
         }
     }
+
+    return btVector3(0,0,0);
 }
 

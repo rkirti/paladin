@@ -66,8 +66,8 @@ int main(int argc, char** argv)
     root->addChild(theFloor);
 
 
-    createTestPowerup();
-    root->addChild(powerUpSwitch);
+    //createTestPowerup();
+    //root->addChild(powerUpSwitch);
     // root->addChild(osgDB::readNodeFile("skydome.osg"));
 
     // Load the model
@@ -116,9 +116,9 @@ int main(int argc, char** argv)
 
 
     // Physics
-    rigidWall = createRigidWall(btVector3(0,0,0),btVector3(500,5,500),NORMAL_Y);
+    // rigidWall = createRigidWall(btVector3(0,0,0),btVector3(500,5,500),NORMAL_Y);
     createRigidModel(model,&palPos);
-    createRigidBox(powerUpSwitch);
+    //createRigidBox(powerUpSwitch);
 
     // Set up the pat updates
     pat->setUpdateCallback(new ModelUpdateCallback(rigidModel, &palPos));

@@ -47,7 +47,7 @@ void createPhysicsWorld();
 btRigidBody* createRigidWall(btVector3 centerOfMass,btVector3 halfExtents,NORMAL_DIRN direction);
 void createRigidBox(osg::ref_ptr<osg::Switch> box);
 
-btVector3 detectCollidingObjects(btVector3);
+btVector3 detectCollidingObjects();
 
 void createRigidModel(osg::ref_ptr<osgCal::Model> model,palladinPosition* palPosPtr);
 // void detectCollidingObjects();
@@ -65,7 +65,7 @@ class ColliderInfo{
         // Information for the PowerUp
         osg::ref_ptr<osg::Switch> powerUp;
 
-        ColliderInfo(btVector3 norm, btVector3 com) : centerOfMass(com), normal(norm)
+        ColliderInfo(btVector3 com, btVector3 norm) : centerOfMass(com), normal(norm)
     {
         type = WALL;
     }
@@ -82,6 +82,13 @@ class ColliderInfo{
         // Function to be called if the type is WALL 
         btVector3 getEffectiveNormal(btVector3 position)
         {
+            std::cout << "Model position: ";
+            std::cout << position.getX() << ","  << position.getY() << ","  << position.getZ() << "\n"; 
+            std::cout << "Wall's Center of Mass: ";
+            std::cout << centerOfMass.getX() << ","  << centerOfMass.getY() << ","  << centerOfMass.getZ() << "\n"; 
+            std::cout << "Normal direction: ";
+            std::cout << normal.getX() << ","  << normal.getY() << ","  << normal.getZ() << "\n"; 
+
             btVector3 temp;
             temp.setX( position.getX() - centerOfMass.getX() );
             temp.setY( position.getY() - centerOfMass.getY() );
@@ -121,6 +128,7 @@ class ModelUpdateCallback: public osg::NodeCallback
             pat->setAttitude(mat.getRotate());
 
             osg::Vec3 position = pat->getPosition();
+
             std::cout << position.x() << " "<< position.y() << " "<< position.z() << " "<<  "\n";
 
 
@@ -130,11 +138,22 @@ class ModelUpdateCallback: public osg::NodeCallback
 
             currentAngle = palPos->currentAngle;
 
-            std::cout << "Calling detect\n" ;
-            
-            // TODO: btVector3 velDirection = getEffectiveNormal(rigidModel->getCenterOfMassPosition());   
+            btVector3 reboundVelocity(detectCollidingObjects());
 
             btScalar prevZVel = rigidModel->getLinearVelocity().getZ();
+
+            std::cout << "Normal : " << reboundVelocity.getX() << ", " << reboundVelocity.getY() << ", " <<reboundVelocity.getZ() << "\n";
+
+            if(reboundVelocity.isZero()) 
+                movementAllowed = true;
+            else 
+                movementAllowed = false;
+
+            std::cout << "movementAllowed : " << movementAllowed << "\n";
+
+            reboundVelocity *= btScalar(100);
+            reboundVelocity.setZ(prevZVel);
+
             // Set LInear x and y
             if(palPos->advance && movementAllowed)
                 rigidModel->setLinearVelocity(btVector3(100*sin(currentAngle),-100*cos(currentAngle),prevZVel));
@@ -143,10 +162,18 @@ class ModelUpdateCallback: public osg::NodeCallback
                 rigidModel->setLinearVelocity(btVector3(0, 0, prevZVel));
 
             else if(palPos->advance && !movementAllowed)
+                rigidModel->setLinearVelocity(reboundVelocity);
+
+            else if(!palPos->advance && !movementAllowed)
+                rigidModel->setLinearVelocity(reboundVelocity);
+
+            /*
+            else if(palPos->advance && !movementAllowed)
                 rigidModel->setLinearVelocity(btVector3(0, 100, prevZVel));
 
             else if(!palPos->advance && !movementAllowed)
                 rigidModel->setLinearVelocity(btVector3(0, 100, prevZVel));
+                */
 
             // Else: collision has happened => do nothing, let collision reset
             // the vel. 
