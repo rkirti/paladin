@@ -83,8 +83,8 @@ int main(int argc, char** argv)
     root->addChild(createWalls());
     createRigidModel(model,&palPos);
 
-    //createTestPowerup();
-    //root->addChild(powerUpSwitch);
+    root->addChild(createPowerUps());
+    
     //root->addChild(createHUD());
     
     // Keyboard handler

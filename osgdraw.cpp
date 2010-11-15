@@ -9,7 +9,7 @@
 #include <fstream>
 #include <iostream>
 
-btRigidBody* tempWall;
+// btRigidBody* tempWall;
 
 using std::ifstream;
 
@@ -87,8 +87,9 @@ osg::ref_ptr<osg::Group> createWall(int comX, int comY, int halfWidth, int halfT
 /////////btRigidBody* createRigidWall(btVector3 centerOfMass,btVector3 halfExtents,NORMAL_DIRN direction);
     btVector3 centerOfMass(comX, comY, height/2);
     btVector3 halfExtents(heX, heY, height/2);
-    tempWall = createRigidWall(centerOfMass, halfExtents, direction);
-    printf("Just after creation : %p\n", tempWall);
+    // tempWall = createRigidWall(centerOfMass, halfExtents, direction);
+    createRigidWall(centerOfMass, halfExtents, direction);
+    // printf("Just after creation : %p\n", tempWall);
 //     std::cout << tempWall->getUserPointer()
 
     // Pos Y face
@@ -155,12 +156,11 @@ osg::ref_ptr<osg::Group> createWalls()
 {
     osg::ref_ptr<osg::Group> grp = new osg::Group;
 
-    /*
     ifstream mazeFile;
     mazeFile.open("./mazeFiles/maze-1.txt");
     while (mazeFile.good())
     {   
-        int CoMX,CoMY;
+        float CoMX,CoMY;
         char dir;
         int isXPointing;
 
@@ -170,13 +170,12 @@ osg::ref_ptr<osg::Group> createWalls()
         if (dir == 'X') isXPointing = 1;
         else isXPointing = 0;
 
-        grp->addChild(createWall(300*CoMX, 300*CoMY, 300, 10, 200, isXPointing));
+        grp->addChild(createWall(300*CoMX, 300*CoMY, 100, 10, 200, isXPointing));
     }
-    */
 
-    grp->addChild(createWall(0,0,100,5,200,0));
-    grp->addChild(createWall(200,200,200,5,200,1));
-    grp->addChild(createWall(-200,200,200,5,200,1));
+    // grp->addChild(createWall(0,0,100,5,200,0));
+    // grp->addChild(createWall(200,200,200,5,200,1));
+    // grp->addChild(createWall(-200,200,200,5,200,1));
 
     return grp;
 }
@@ -201,119 +200,36 @@ osg::ref_ptr<osgCal::Model> createModel(const std::string fileName)
     return model;
 }
 
-osg::Geode* createPyramid()
+osg::ref_ptr<osg::Switch> createPowerUp(int x, int y, int z)
 {
-   osg::Geode* pyramidGeode = new osg::Geode();
-   osg::Geometry* pyramidGeometry = new osg::Geometry();
-   pyramidGeode->addDrawable(pyramidGeometry); 
-   // Specify the vertices:
-   osg::Vec3Array* pyramidVertices = new osg::Vec3Array;
-   pyramidVertices->push_back( osg::Vec3(0, 0, 0) ); // front left 
-   pyramidVertices->push_back( osg::Vec3(2, 0, 0) ); // front right 
-   pyramidVertices->push_back( osg::Vec3(2, 2, 0) ); // back right 
-   pyramidVertices->push_back( osg::Vec3( 0,2, 0) ); // back left 
-   pyramidVertices->push_back( osg::Vec3( 1, 1,2) ); // peak
-   
-   //Associate this set of vertices with the geometry associated with the
-   //geode we added to the scene.
-   pyramidGeometry->setVertexArray( pyramidVertices );
+    int rad = 10;
 
-   osg::DrawElementsUInt* pyramidBase = 
-      new osg::DrawElementsUInt(osg::PrimitiveSet::QUADS, 0);
-   pyramidBase->push_back(3);
-   pyramidBase->push_back(2);
-   pyramidBase->push_back(1);
-   pyramidBase->push_back(0);
-   pyramidGeometry->addPrimitiveSet(pyramidBase);
+    osg::ref_ptr<osg::Sphere> sph = new osg::Sphere(osg::Vec3(x, y, z), rad);
+    osg::ref_ptr<osg::ShapeDrawable> drawable = new osg::ShapeDrawable(sph);
 
-   //Repeat the same for each of the four sides. Again, vertices are 
-   //specified in counter-clockwise order. 
+    osg::ref_ptr<osg::Geode> geode = new osg::Geode;
+    geode->addDrawable(drawable);
 
-   osg::DrawElementsUInt* pyramidFaceOne = 
-      new osg::DrawElementsUInt(osg::PrimitiveSet::TRIANGLES, 0);
-   pyramidFaceOne->push_back(0);
-   pyramidFaceOne->push_back(1);
-   pyramidFaceOne->push_back(4);
-   pyramidGeometry->addPrimitiveSet(pyramidFaceOne);
+    osg::ref_ptr<osg::Switch> swt= new osg::Switch;
+    swt->addChild(geode.get(), true);
 
-   osg::DrawElementsUInt* pyramidFaceTwo = 
-      new osg::DrawElementsUInt(osg::PrimitiveSet::TRIANGLES, 0);
-   pyramidFaceTwo->push_back(1);
-   pyramidFaceTwo->push_back(2);
-   pyramidFaceTwo->push_back(4);
-   pyramidGeometry->addPrimitiveSet(pyramidFaceTwo);
+    // Rigid body
+    createRigidPowerUp(btVector3(x,y,z), rad, swt, geode);
 
-   osg::DrawElementsUInt* pyramidFaceThree = 
-      new osg::DrawElementsUInt(osg::PrimitiveSet::TRIANGLES, 0);
-   pyramidFaceThree->push_back(2);
-   pyramidFaceThree->push_back(3);
-   pyramidFaceThree->push_back(4);
-   pyramidGeometry->addPrimitiveSet(pyramidFaceThree);
+    return swt;
 
-   osg::DrawElementsUInt* pyramidFaceFour = 
-      new osg::DrawElementsUInt(osg::PrimitiveSet::TRIANGLES, 0);
-   pyramidFaceFour->push_back(3);
-   pyramidFaceFour->push_back(0);
-   pyramidFaceFour->push_back(4);
-   pyramidGeometry->addPrimitiveSet(pyramidFaceFour);
-   
-   osg::Vec4Array* colors = new osg::Vec4Array;
-   colors->push_back(osg::Vec4(1.0f, 0.0f, 0.0f, 1.0f) ); //index 0 red
-   colors->push_back(osg::Vec4(0.0f, 1.0f, 0.0f, 1.0f) ); //index 1 green
-   colors->push_back(osg::Vec4(0.0f, 0.0f, 1.0f, 1.0f) ); //index 2 blue
-   colors->push_back(osg::Vec4(1.0f, 1.0f, 1.0f, 1.0f) ); //index 3 white
-   osg::TemplateIndexArray<unsigned int, osg::Array::UIntArrayType,4,4> 
-      *colorIndexArray;colorIndexArray = new 
-      osg::TemplateIndexArray<unsigned int, osg::Array::UIntArrayType,4,4>;
-   colorIndexArray->push_back(0); // vertex 0 assigned color array element 0
-   colorIndexArray->push_back(1); // vertex 1 assigned color array element 1
-   colorIndexArray->push_back(2); // vertex 2 assigned color array element 2
-   colorIndexArray->push_back(3); // vertex 3 assigned color array element 3
-   colorIndexArray->push_back(0); // vertex 4 assigned color array element 0
-   pyramidGeometry->setColorArray(colors);
-   pyramidGeometry->setColorIndices(colorIndexArray);
-   pyramidGeometry->setColorBinding(osg::Geometry::BIND_PER_VERTEX);
-
-   // Since the mapping from vertices to texture coordinates is 1:1, 
-   //  we don't need to use an index array to map vertices to texture
-   //  coordinates. We can do it directly with the 'setTexCoordArray' 
-   //  method of the Geometry class. 
-   //  This method takes a variable that is an array of two dimensional
-   //  vectors (osg::Vec2). This variable needs to have the same
-   //  number of elements as our Geometry has vertices. Each array element
-   //  defines the texture coordinate for the cooresponding vertex in the
-   //  vertex array.
-   osg::Vec2Array* texcoords = new osg::Vec2Array(5);
-   (*texcoords)[0].set(0.00f,0.0f); // tex coord for vertex 0 
-   (*texcoords)[1].set(0.25f,0.0f); // tex coord for vertex 1 
-   (*texcoords)[2].set(0.50f,0.0f); //  ""
-   (*texcoords)[3].set(0.75f,0.0f); //  "" 
-   (*texcoords)[4].set(0.50f,1.0f); //  ""
-   pyramidGeometry->setTexCoordArray(0,texcoords);
-   return pyramidGeode;
 }
 
-void createTestPowerup()
+osg::ref_ptr<osg::Group> createPowerUps()
 {
 
-    powerUpSwitch = new osg::Switch; 
+    osg::ref_ptr<osg::Group> grp = new osg::Group;
 
-    osg::Box* unitCube = new osg::Box( osg::Vec3(50,50,50),50.0f);
+    grp->addChild(createPowerUp(-100, -100, 100));
+    grp->addChild(createPowerUp(-200, -200, 100));
 
-    osg::ShapeDrawable* unitCubeDrawable = new osg::ShapeDrawable(unitCube);
+    return grp;
 
-    // Declare a instance of the geode class:
-    basicShapesGeode = new osg::Geode();
-
-    // Add the unit cube drawable to the geode:
-    basicShapesGeode->addDrawable(unitCubeDrawable);
-
-    powerUpSwitch->addChild(basicShapesGeode);
-}
-
-void disablePowerUp()
-{
-    powerUpSwitch->setChildValue(basicShapesGeode.get(), false);
 }
 
 void followTheModel(osgViewer::Viewer* viewer, osgCal::Model *model)

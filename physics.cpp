@@ -3,12 +3,12 @@
 
 
 btDynamicsWorld *m_dynamicsWorld;
-btRigidBody* rigidWall;
-btRigidBody* rigidBox;
+// btRigidBody* rigidWall;
+// btRigidBody* rigidBox;
 btRigidBody* rigidModel;
 bool movementAllowed=true;
 
-extern btRigidBody* tempWall;
+// extern btRigidBody* tempWall;
 
 void getModelDownCallback(btDynamicsWorld* world,btScalar timestep)
 {
@@ -96,7 +96,7 @@ btRigidBody* createRigidPowerUp(btVector3 centerOfMass,btScalar radius,osg::ref_
     btRigidBody* rigidSphere = createRigidBody(m_dynamicsWorld,btScalar(0.f),trans, sphere_shape);
     
     rigidSphere->setUserPointer(new ColliderInfo(puSwitch,puGeode));
-    rigidSphere->setCollisionFlags(rigidWall->getCollisionFlags() | btCollisionObject::CF_STATIC_OBJECT); 
+    rigidSphere->setCollisionFlags(rigidSphere->getCollisionFlags() | btCollisionObject::CF_STATIC_OBJECT); 
     rigidSphere->setActivationState(DISABLE_DEACTIVATION);
     return rigidSphere;
 }
@@ -166,7 +166,7 @@ btVector3 detectCollidingObjects()
             // Get the other colliding body
             if (obA == rigidModel) 
             {
-                btBoxShape *box = static_cast<btBoxShape*>((static_cast<btCollisionObject*>(obB))->getCollisionShape());
+                // btBoxShape *box = static_cast<btBoxShape*>((static_cast<btCollisionObject*>(obB))->getCollisionShape());
 
                 if ( ((ColliderInfo*)(obB->getUserPointer()))->type == WALL ) 
                     return   ((ColliderInfo*)(obB->getUserPointer()))->getEffectiveNormal(rigidModel->getCenterOfMassPosition());
@@ -174,18 +174,21 @@ btVector3 detectCollidingObjects()
                 {
 
                     // Call function to destroy the powerup and increment points
+                    ((ColliderInfo*)(obB->getUserPointer()))->destroyPowerUp();
                     return btVector3(0,0,0);
                 }
             }
             else if (obB == rigidModel)
             {
-                btBoxShape *box = static_cast<btBoxShape*>((static_cast<btCollisionObject*>(obA))->getCollisionShape());
+                // btBoxShape *box = static_cast<btBoxShape*>((static_cast<btCollisionObject*>(obA))->getCollisionShape());
+                
                 if ( ((ColliderInfo*)(obA->getUserPointer()))->type == WALL ) 
                     return   ((ColliderInfo*)(obA->getUserPointer()))->getEffectiveNormal(rigidModel->getCenterOfMassPosition());
                 else if ( ((ColliderInfo*)(obA->getUserPointer()))->type == POWER_UP ) 
                 {
 
                     // Call function to destroy the powerup and increment points
+                    ((ColliderInfo*)(obA->getUserPointer()))->destroyPowerUp();
                     return btVector3(0,0,0);
                 }
             }

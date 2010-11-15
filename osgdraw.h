@@ -38,8 +38,7 @@ void followTheModel(osgViewer::Viewer* viewer, osgCal::Model *model);
 
 osg::ref_ptr<osg::Group> createWalls();
 
-void createTestPowerup();
-void disablePowerUp();
+osg::ref_ptr<osg::Group> createPowerUps();
 
 class AnimationToggleHandler : public osgGA::GUIEventHandler 
 {

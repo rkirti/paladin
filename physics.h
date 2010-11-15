@@ -77,9 +77,10 @@ class ColliderInfo{
 
 
         // Function to be called if the type is POWER_UP
-        // TODO: Destroy the osg stuff here
+        // Destroy the osg stuff here
         void destroyPowerUp()
         {
+            puSwitch->setChildValue(puGeode.get(), false);
         }
 
 
