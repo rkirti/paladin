@@ -223,13 +223,13 @@ if __name__ == "__main__":
       for j in range(dim):
         print repr(j+0.5)  + "  0  " + "Y"
       for i in range(dim):
-        print "0  " + str(i + 1/2) + "  X"
+        print "0  " + repr(i + 0.5) + "  X"
         for j in range(dim):
           if i == dim-1 or maze.maze[i][j][RIGHTWALL]:
-            print str(i) + "  " + str(j+1/2) + "  X"
+            print repr(i) + "  " + repr(j+0.5) + "  X"
         for j in range(dim):
           if i == dim-1 or maze.maze[i][j][BOTTOMWALL]:
-            print str(i+1/2) + "  " + str(j) + "  Y"
+            print repr(i+0.5) + "  " + repr(j) + "  Y"
     else:
       maze = Maze( abs(n_rows), abs(n_cols) )
       print maze.as_html_table()
