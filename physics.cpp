@@ -8,52 +8,6 @@ btRigidBody* rigidBox;
 btRigidBody* rigidModel;
 bool movementAllowed=true;
 
-//enum collider_type{POWER_UP,WALL};
-//typedef enum collider_type COLLIDER_TYPE;
-//
-//enum normal_dirn{NORMAL_X,NORMAL_Y};
-//typedef enum normal_dirn NORMAL_DIRN;
-
-
-/*
- * [immanuel] :Moved to header file
-class ColliderInfo{
-    public:
-        // What is the object type - PowerUp or Wall ?
-        COLLIDER_TYPE type;
-        // Information for the wall 
-        btVector3 centerOfMass;
-        btVector3 normal;
-        // Information for the PowerUp
-        osg::ref_ptr<osg::Switch> powerUp;
-
-        ColliderInfo(btVector3 norm, btVector3 com) : centerOfMass(com), normal(norm)
-    {
-    }
-        ColliderInfo(osg::ref_ptr<osg::Switch> powerupInstance): powerUp(powerupInstance)
-    {
-    }
-        ~ColliderInfo();
-
-
-        // Function to be called if the type is POWER_UP
-        // TODO: Add powerup destroy function here    
-
-        // Function to be called if the type is WALL 
-        btVector3 getEffectiveNormal(btVector3 position)
-        {
-            btVector3 temp;
-            temp.setX( position.getX() - centerOfMass.getX() );
-            temp.setY( position.getY() - centerOfMass.getY() );
-            temp.setZ( position.getZ() - centerOfMass.getZ() );
-            if (normal.dot(temp) > 0)
-                return normal;
-            else return (-1)*normal;
-        }
-};
-*/
-
-
 void getModelDownCallback(btDynamicsWorld* world,btScalar timestep)
 {
     btVector3 curVelocity(rigidModel->getLinearVelocity());
@@ -212,58 +166,57 @@ void createRigidModel(osg::ref_ptr<osgCal::Model> model,palladinPosition* palPos
 
 
 
-void detectCollidingObjects(btVector3 comModel)
+btVector3 detectCollidingObjects(btVector3 comModel)
 {
     int numManifolds =  m_dynamicsWorld->getDispatcher()->getNumManifolds();
     printf("%d\n",numManifolds);
     movementAllowed = true;
-    if(numManifolds == 0) movementAllowed = true;
+    if(numManifolds == 0) 
+        movementAllowed = true;
     else
     {
         for (int i=0;i<numManifolds;i++)
         {
+            // get the contact points - the manifold stores pairs of them
             btPersistentManifold* contactManifold = m_dynamicsWorld->getDispatcher()->getManifoldByIndexInternal(i);
-            btCollisionObject* obA = static_cast<btCollisionObject*>(contactManifold->getBody0());
-            btCollisionObject* obB = static_cast<btCollisionObject*>(contactManifold->getBody1());
-            printf("%p   %p   %p   %p\n",obA,obB,rigidModel, rigidBox);
 
-            btCollisionObject* wall=NULL;
-            if(obA == rigidModel)
+            // get the two colliding bodies
+            btRigidBody* obA = static_cast<btRigidBody*>(contactManifold->getBody0());
+            btRigidBody* obB = static_cast<btRigidBody*>(contactManifold->getBody1());
+
+
+            // Get the other colliding body
+            if (obA == rigidModel) 
             {
-                wall = obB;
+                if ( ((ColliderInfo*)(obB->getUserPointer()))->type == WALL ) 
+                    return   ((ColliderInfo*)(obB->getUserPointer()))->getEffectiveNormal(rigidModel->getCenterOfMassPosition());
+                else if ( ((ColliderInfo*)(obB->getUserPointer()))->type == POWER_UP ) 
+                {
+
+                    // Call function to destroy the powerup and increment points
+                    return btVector3(0,0,0);
+                }
             }
-            else if(obB == rigidModel)
+            else if (obB == rigidModel)
             {
-                wall = obA;
+                if ( ((ColliderInfo*)(obA->getUserPointer()))->type == WALL ) 
+                    return   ((ColliderInfo*)(obA->getUserPointer()))->getEffectiveNormal(rigidModel->getCenterOfMassPosition());
+                else if ( ((ColliderInfo*)(obA->getUserPointer()))->type == POWER_UP ) 
+                {
+
+                    // Call function to destroy the powerup and increment points
+                    return btVector3(0,0,0);
+                }
+
+
+
+
+
             }
 
-            if(wall != NULL)
-            {
-                movementAllowed = false;
-                // return (static_cast<ColliderInfo>(wall->getUserPointer()))->getEffectiveNormal(comModel);
-            }
 
-            /*
-            if ((obA == rigidWall && obB == rigidModel) || (obA == rigidModel && obB == rigidWall)) 
-            {
-                if (movementAllowed)
-                    std::cout  << "Disallowing movement now" << std::endl; 
-                movementAllowed = false;
-            }
-            else 
-            {
-                if (!movementAllowed)
-                    std::cout  << "Allowing movement now" << std::endl; 
-                movementAllowed = true;
-            }
-        
-            if ((obA == rigidBox && obB == rigidModel) || (obA == rigidModel && obB == rigidBox)) 
-            {
-                std::cout << "BLOWING UP THE BOX" << std::endl;
-                disablePowerUp();
-                 
-            }
-            */
+
+
         }
     }
 }

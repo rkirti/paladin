@@ -47,7 +47,7 @@ void createPhysicsWorld();
 btRigidBody* createRigidWall(btVector3 centerOfMass,btVector3 halfExtents,NORMAL_DIRN direction);
 void createRigidBox(osg::ref_ptr<osg::Switch> box);
 
-void detectCollidingObjects(btVector3);
+btVector3 detectCollidingObjects(btVector3);
 
 void createRigidModel(osg::ref_ptr<osgCal::Model> model,palladinPosition* palPosPtr);
 // void detectCollidingObjects();
