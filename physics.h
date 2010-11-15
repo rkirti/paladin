@@ -63,13 +63,14 @@ class ColliderInfo{
         btVector3 centerOfMass;
         btVector3 normal;
         // Information for the PowerUp
-        osg::ref_ptr<osg::Switch> powerUp;
+        osg::ref_ptr<osg::Switch> puSwitch;
+        osg::ref_ptr<osg::Geode> puGeode;
 
         ColliderInfo(btVector3 com, btVector3 norm) : centerOfMass(com), normal(norm)
     {
         type = WALL;
     }
-        ColliderInfo(osg::ref_ptr<osg::Switch> powerupInstance): powerUp(powerupInstance)
+        ColliderInfo(osg::ref_ptr<osg::Switch> pswitch, osg::ref_ptr<osg::Geode> pgeode): puSwitch(pswitch), puGeode(pgeode)
     {
         type = POWER_UP;
     }
@@ -77,7 +78,11 @@ class ColliderInfo{
 
 
         // Function to be called if the type is POWER_UP
-        // TODO: Add powerup destroy function here    
+        // TODO: Destroy the osg stuff here
+        void destroyPowerUp()
+        {
+        }
+
 
         // Function to be called if the type is WALL 
         btVector3 getEffectiveNormal(btVector3 position)
