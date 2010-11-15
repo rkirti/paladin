@@ -6,10 +6,10 @@ LDFLAGS = -losg -losgDB -losgViewer -losgCal -losgUtil -losgViewer -lBulletDynam
 
 
 demo: main.cpp movement.h physics.o skybox.o hud.o osgdraw.o
-	g++ $^ -o $@  $(CFLAGS) $(LDFLAGS) $(WFLAGS)
+	g++ $^ -o $@  $(LDFLAGS) $(WFLAGS)
 
-%.o:
-	gcc -c $*.cpp $(CFLAGS) $(LDFLAGS) $(WFLAGS)
+%.o: %.cpp
+	gcc -c $*.cpp $(CFLAGS)  $(WFLAGS)
 
 clean:
 	rm demo *.o
