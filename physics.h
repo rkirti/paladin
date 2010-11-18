@@ -27,6 +27,9 @@
 #include <stdlib.h>
 #include "movement.h"
 
+#include "hud.h"
+
+extern HUDElement* hud;; 
 
 enum collider_type{POWER_UP,WALL};
 typedef enum collider_type COLLIDER_TYPE;
@@ -64,6 +67,7 @@ class ColliderInfo{
         // Information for the PowerUp
         osg::ref_ptr<osg::Switch> puSwitch;
         osg::ref_ptr<osg::Geode> puGeode;
+        bool visible;
 
         ColliderInfo(btVector3 com, btVector3 norm) : centerOfMass(com), normal(norm)
     {
@@ -72,6 +76,7 @@ class ColliderInfo{
         ColliderInfo(osg::ref_ptr<osg::Switch> pswitch, osg::ref_ptr<osg::Geode> pgeode): puSwitch(pswitch), puGeode(pgeode)
     {
         type = POWER_UP;
+        visible = true;
     }
         ~ColliderInfo();
 
@@ -80,7 +85,13 @@ class ColliderInfo{
         // Destroy the osg stuff here
         void destroyPowerUp()
         {
-            puSwitch->setChildValue(puGeode.get(), false);
+            if(visible)
+            {
+                puSwitch->setChildValue(puGeode.get(), false);
+
+                hud->IncreementScore();
+                visible = false;
+            }
         }
 
 
@@ -156,12 +167,12 @@ class ModelUpdateCallback: public osg::NodeCallback
 
             std::cout << "movementAllowed : " << movementAllowed << "\n";
 
-            reboundVelocity *= btScalar(100);
+            reboundVelocity *= btScalar(300);
             reboundVelocity.setZ(prevZVel);
 
             // Set LInear x and y
             if(palPos->advance && movementAllowed)
-                rigidModel->setLinearVelocity(btVector3(100*sin(currentAngle),-100*cos(currentAngle),prevZVel));
+                rigidModel->setLinearVelocity(btVector3(300*sin(currentAngle),-300*cos(currentAngle),prevZVel));
 
             else if(!palPos->advance && movementAllowed)
                 rigidModel->setLinearVelocity(btVector3(0, 0, prevZVel));

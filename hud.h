@@ -11,6 +11,7 @@
 #include <osgDB/ReadFile> 
 #include <osg/Projection>
 
+#include <osgText/Text>
 #include <string>
 
 
@@ -21,6 +22,18 @@ public:
 	void DefineHUDQuad(osg::Vec3 ll_corner, osg::Vec3 ul_corner, osg::Vec3 ur_corner, osg::Vec3 lr_corner, int posx, int posy, const std::string texture_filename, int draw_order=11);
 	void DefineHUDQuad(float width, float height, int posx, int posy, const std::string texture_filename, int draw_order=11);
 	void Rotate(float degrees);
+
+    void DisplayScore();
+
+    void IncreementScore(){
+        score += 10;
+        DisplayScore();
+    }
+    void DecreementScore(){
+        if(score > 0) score -= 10;
+        DisplayScore();
+    }
+void DisplayInitScreen();
     
 
 private:
@@ -35,11 +48,11 @@ private:
 	osg::ref_ptr<osg::Texture2D> mHUDTexture;
 	osg::ref_ptr<osg::Image> mHudImage;
 	osg::Matrix mMtx;
+    osgText::Text* textOne;
+    osg::Switch *swt;
+    int score;
 	int mPosX;
 	int mPosY;
 };
-
-
-
 
 #endif

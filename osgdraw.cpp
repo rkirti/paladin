@@ -13,7 +13,7 @@
 
 using std::ifstream;
 
-osg::ref_ptr<osg::Switch> powerUpSwitch; 
+// osg::ref_ptr<osg::Switch> powerUpSwitch; 
 osg::ref_ptr<osg::Geode> basicShapesGeode; 
 
 osg::ref_ptr<osg::Geode> createSide(osg::ref_ptr<osg::Vec3Array> corners, osg::ref_ptr<osg::Vec3Array> normal, osg::ref_ptr<osg::Image> image)
@@ -25,6 +25,17 @@ osg::ref_ptr<osg::Geode> createSide(osg::ref_ptr<osg::Vec3Array> corners, osg::r
     // geom->setVertexArray( v.get() );
     geom->setVertexArray( corners.get() );
     // Create an array of four colors.
+
+    int lengthX = ((*corners)[1] + (-(*corners)[0])).length();
+    int lengthY = ((*corners)[1] + (-(*corners)[2])).length();
+    // std::cout << "Imageeeeeeeeeee " << image.get()->s() << "," << image.get()->t() << "\n";
+    // std::cout << (*corners)[0].x() << ", " << (*corners)[0].y() << ", " <<(*corners)[0].z() << "\n";
+    // std::cout << (*corners)[1].x() << ", " << (*corners)[1].y() << ", " <<(*corners)[1].z() << "\n";
+    // std::cout << (*corners)[2].x() << ", " << (*corners)[2].y() << ", " <<(*corners)[2].z() << "\n";
+    // std::cout << (*corners)[3].x() << ", " << (*corners)[3].y() << ", " <<(*corners)[3].z() << "\n";
+    // std::cout << lengthX << ", " << lengthY << "\n";
+    float ratioX = ((float)lengthX)/(image.get()->s());
+    float ratioY = ((float)lengthY)/(image.get()->t());
 
     // Create an array for the single normal.
     geom->setNormalArray( normal.get() );
@@ -40,9 +51,9 @@ osg::ref_ptr<osg::Geode> createSide(osg::ref_ptr<osg::Vec3Array> corners, osg::r
 
     osg::Vec2Array *mTexcoords = new osg::Vec2Array(8);
    (*mTexcoords)[0].set(0.0f,0.0f);
-   (*mTexcoords)[1].set(2.0f,0.0f);
-   (*mTexcoords)[2].set(2.0f,2.0f);
-   (*mTexcoords)[3].set(0.0f,2.0f);
+   (*mTexcoords)[1].set(ratioX,0.0f);
+   (*mTexcoords)[2].set(ratioX,ratioY);
+   (*mTexcoords)[3].set(0.0f,ratioY);
 
    geom->setTexCoordArray(0,mTexcoords);
     // Colors
@@ -157,20 +168,22 @@ osg::ref_ptr<osg::Group> createWalls()
     osg::ref_ptr<osg::Group> grp = new osg::Group;
 
     ifstream mazeFile;
-    mazeFile.open("./mazeFiles/maze-1.txt");
+    // mazeFile.open("./mazeFiles/maze-1.txt");
+    mazeFile.open("./mazeFiles/maze-custom.txt");
     while (mazeFile.good())
     {   
         float CoMX,CoMY;
         char dir;
         int isXPointing;
+        int halfWidth;
 
-        mazeFile >> CoMX >> CoMY >> dir;
+        mazeFile >> CoMX >> CoMY >> halfWidth >> dir;
 
         std::cout << CoMX << CoMY << dir << "\n";
         if (dir == 'X') isXPointing = 1;
         else isXPointing = 0;
 
-        grp->addChild(createWall(300*CoMX, 300*CoMY, 100, 10, 200, isXPointing));
+        grp->addChild(createWall(CoMX, CoMY, halfWidth, 10, 200, isXPointing));
     }
 
     // grp->addChild(createWall(0,0,100,5,200,0));
@@ -307,6 +320,11 @@ bool AnimationToggleHandler::handle(const osgGA::GUIEventAdapter& ea, osgGA::GUI
                     /// currentAngle -= 0.05;
                     // rigidModel->setLinearVelocity(btVector3(100*sin(currentAngle),-100*cos(currentAngle),0));
                     palPos->decreementAngle();
+                }
+                else if( ea.getKey() == ' ')
+                {
+                    if(rigidModel->getCenterOfMassPosition().getZ() == 0)
+                        rigidModel->applyCentralImpulse(btVector3(0,0,20000));
                 }
 
                 break;

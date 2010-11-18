@@ -31,7 +31,7 @@
 
 #include "osgdraw.h"
 
-extern osg::ref_ptr<osg::Switch> powerUpSwitch; 
+HUDElement* hud;; 
 
 
 int main(int argc, char** argv)
@@ -85,7 +85,9 @@ int main(int argc, char** argv)
 
     root->addChild(createPowerUps());
     
-    //root->addChild(createHUD());
+    // root->addChild(createHUD());
+	hud = new HUDElement(root, 1200, 800);
+	hud->DefineHUDQuad( 1200, 150, 600, 75, "data/floor.png", 11);
     
     // Keyboard handler
     viewer.addEventHandler( new AnimationToggleHandler( model , &palPos));

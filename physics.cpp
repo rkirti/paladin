@@ -42,8 +42,8 @@ void getModelDownCallback(btDynamicsWorld* world,btScalar timestep)
 void createPhysicsWorld()
 {
     // World co-ordinates
-    btVector3 worldAabbMin(-1000, -1000, -1000);
-    btVector3 worldAabbMax(1000, 1000, 1000);
+    btVector3 worldAabbMin(-2000, -2000, -2000);
+    btVector3 worldAabbMax(2000, 2000, 2000);
     const int maxProxies = 32766;
 
     // Create world with every physics component default
@@ -166,22 +166,32 @@ btVector3 detectCollidingObjects()
             // Get the other colliding body
             if (obA == rigidModel) 
             {
-                // btBoxShape *box = static_cast<btBoxShape*>((static_cast<btCollisionObject*>(obB))->getCollisionShape());
+                btBoxShape *box = static_cast<btBoxShape*>((static_cast<btCollisionObject*>(obB))->getCollisionShape());
+                btVector3 halfExtents = box->getHalfExtentsWithMargin();
+                btVector3 CoM = obB->getCenterOfMassPosition();
+                std:: cout << "Half extents of the colliding box: " << halfExtents.getX() << "," << halfExtents.getY() << ","  << halfExtents.getZ() << "\n" ;
+                std::cout << "Rigid body CoM: "    << CoM.getX() << "," << CoM.getY() << ","  << CoM.getZ() << "\n" ;
 
-                if ( ((ColliderInfo*)(obB->getUserPointer()))->type == WALL ) 
-                    return   ((ColliderInfo*)(obB->getUserPointer()))->getEffectiveNormal(rigidModel->getCenterOfMassPosition());
-                else if ( ((ColliderInfo*)(obB->getUserPointer()))->type == POWER_UP ) 
-                {
+                    
+                    if ( ((ColliderInfo*)(obB->getUserPointer()))->type == WALL ) 
+                        return   ((ColliderInfo*)(obB->getUserPointer()))->getEffectiveNormal(rigidModel->getCenterOfMassPosition());
+                    else if ( ((ColliderInfo*)(obB->getUserPointer()))->type == POWER_UP ) 
+                    {
 
-                    // Call function to destroy the powerup and increment points
-                    ((ColliderInfo*)(obB->getUserPointer()))->destroyPowerUp();
-                    return btVector3(0,0,0);
-                }
+                        // Call function to destroy the powerup and increment points
+                        ((ColliderInfo*)(obB->getUserPointer()))->destroyPowerUp();
+                        return btVector3(0,0,0);
+                    }
             }
             else if (obB == rigidModel)
             {
-                // btBoxShape *box = static_cast<btBoxShape*>((static_cast<btCollisionObject*>(obA))->getCollisionShape());
-                
+                btBoxShape *box = static_cast<btBoxShape*>((static_cast<btCollisionObject*>(obA))->getCollisionShape());
+                btVector3 halfExtents = box->getHalfExtentsWithMargin();
+                btVector3 CoM = obA->getCenterOfMassPosition();
+                std:: cout << "Half extents of the colliding box: " << halfExtents.getX() << "," << halfExtents.getY() << ","  << halfExtents.getZ() << "\n" ;
+                std::cout << "Rigid body CoM: "    << CoM.getX() << "," << CoM.getY() << ","  << CoM.getZ() << "\n" ;
+
+
                 if ( ((ColliderInfo*)(obA->getUserPointer()))->type == WALL ) 
                     return   ((ColliderInfo*)(obA->getUserPointer()))->getEffectiveNormal(rigidModel->getCenterOfMassPosition());
                 else if ( ((ColliderInfo*)(obA->getUserPointer()))->type == POWER_UP ) 
