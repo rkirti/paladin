@@ -147,10 +147,10 @@ void HUDElement::DisplayInitScreen()
        osg::Geometry* HUDBackgroundGeometry = new osg::Geometry();
 
        osg::Vec3Array* HUDBackgroundVertices = new osg::Vec3Array;
-       HUDBackgroundVertices->push_back( osg::Vec3( -600,0,-1) );
-       HUDBackgroundVertices->push_back( osg::Vec3(600, 0,-1) );
-       HUDBackgroundVertices->push_back( osg::Vec3(600,800,-1) );
-       HUDBackgroundVertices->push_back( osg::Vec3( -600  ,800,-1) );
+       HUDBackgroundVertices->push_back( osg::Vec3( -600,-75,-1) );
+       HUDBackgroundVertices->push_back( osg::Vec3(600, -75,-1) );
+       HUDBackgroundVertices->push_back( osg::Vec3(600,725,-1) );
+       HUDBackgroundVertices->push_back( osg::Vec3( -600  ,725,-1) );
 
        osg::DrawElementsUInt* HUDBackgroundIndices = new osg::DrawElementsUInt(osg::PrimitiveSet::POLYGON, 0);
        HUDBackgroundIndices->push_back(0);
