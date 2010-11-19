@@ -111,46 +111,39 @@ morekeywords={*,...}            % if you want to add more keywords to the set
 
 \section*{\color{db}Project Statement}
 Select any set of tools (gaming engines, libraries etc) and display gaming
-features involving human characters. Minimum requirements is to have the
+features involving one or more human characters. Minimum requirement is to have 
 character animation such as walking, running etc user-controlled and to
 demonstrate constraints on the motion. 
 
 \subsection*{\color{db}Overview of the submitted project}
 Lorem Ipsum
+% Features covered -
+% Skybox, terrain and textured walls
+% Character animation -- the model can stand still, walk around or run
+% Physics Engine - collision detection - model cannot walk into walls, power boosters blown up on collision
+% Overhead Display - we display score
 
 \subsection*{\color{db}Libraries used}
 \begin{itemize}
-\item \textbf{OpenSceneGraph - v.2.8.0 : } Library for rendering scene data
-- terrain and skyboxes 
+\item \textbf{OpenSceneGraph - v.2.8.0 : } Library for rendering scene data - terrain and skyboxes 
 \item \textbf{Cal3d - v0.11 : } Library for character models (mesh data) and animation control
-\item \textbf{BulletPhysics - v2.77 : } Physics engine for collision detection
-and dynamics implementation
+\item \textbf{BulletPhysics - v2.77 : } Physics engine for collision detection and dynamics implementation
 \end{itemize}
 
+\section*{Details of the game graphics}
+\subsection*{The SceneGraph flowchart}
+\subsection*{Screenshots}
+Lorem Ipsum
+% One for the starting screen
+% One for the character animations
+% One for within the maze - preferably with a powerup on top
 
-\section{\color{db}Logic Used}
-We divide the matrix in NxN blocks. The block size is determined by experimentation - we need to get the maximum size such that 3 blocks can fit in the cache.
-A block size of 256 does well till about 4096, after which it does not work. Since the cache is known to be 512 KB (L1), known using dmidecode, a smaller block size is tried.
-Now, consider all the blocks being given indexes with respect to x and y offsets. Therefore the first block is 0,0. To get the i,j block of the resultant matrix, we multiply
-$A_i,k$ and $B_k,j$ where k varies from 1 to number of blocks. The sum of all these partial products gives the block in the resultant matrix.
+\section*{Details of the physics backend}
+Lorem Ipsum 
+% Phart on how bullet physics interacts with OSG  with example
 
-\section{\color{db}System configuration}
-\begin{itemize}
-\item \textbf{Compilation options:} In all the cases, the code with compiled with -O3 option.
-\item \textbf{Processor:} The system is a dual-core AMD processor with each core running at a maximum frequency of 1.8 GHz. 
-\item \textbf{Caches:} The system has a 64 KB instruction cache and a 64KB data cache for the L1 cache. The L2 cache is 256 KB in size.
-The cache line size is 64 bytes for all. The L1 caches have 512 sets and are 2-way associative. The L2 cache is 16 way associative.
-\end{itemize}
-
-
-\clearpage
-\subsection{\color{grey}Results}
-The red plot shows the naive version of the algorithm. The other three are with blocking, testing different block sizes. The violet one is for block size 256,
-the green one for 128 and the last one for block size 64. One can see that 128 is the optimal block size- since the move from 256 to 128 shows significant performance improvement, 
-but the one from 128 to 64 doesn't show any improvement except at the kink at 2048.
-The spike at 2048 cannot be accounted for by the author - it corresponds to a matrix size of 16MB. 
-
-
+\section*{Code Snippets}
+Lorem Ipsum 
 
 
 \section{\color{db}Result data and code}
