@@ -4,6 +4,7 @@
 \usepackage{listings}
 \usepackage{palatino}
 \usepackage{color}
+\usepackage{textcomp}
 
 \usepackage[
   ps2pdf,
@@ -35,53 +36,42 @@
 }
 
 
-%\def\codefont{
-%  \fontspec{Courier New}
-%  \fontsize{9pt}{11pt}\selectfont}
-%\newenvironment{code}
-%{\begin{center}
-%    \begin{tikzpicture}
-%      \node [fill=lb,rounded corners=5pt]
-%      \bgroup
-%      \bgroup\codefont
-%      \begin{tabular}{l}}
-%      {\end{tabular}
-%      \egroup
-%      \egroup;
-%    \end{tikzpicture}
-%  \end{center}}
-
 % Colors
 \definecolor{gold}{rgb}{0.85,.66,0}
 \definecolor{db}{rgb}{0,0.08,0.45} 
 \definecolor{lb}{rgb}{0.8,0.85,1}
+\definecolor{llb}{rgb}{0.90,0.90,1}
 \definecolor{grey}{gray}{0.4}
 
-
-
-
-\lstset{ %
-language=C,                % choose the language of the code
-basicstyle=\footnotesize,       % the size of the fonts that are used for the code
-numbers=left,                   % where to put the line-numbers
-numberstyle=\footnotesize,      % the size of the fonts that are used for the line-numbers
-stepnumber=2,                   % the step between two line-numbers. If it's 1 each line 
-                                % will be numbered
-numbersep=5pt,                  % how far the line-numbers are from the code
-backgroundcolor=\color{lb},  % choose the background color. You must add \usepackage{color}
-showspaces=false,               % show spaces adding particular underscores
-showstringspaces=false,         % underline spaces within strings
-showtabs=false,                 % show tabs within strings adding particular underscores
-frame=single,	                % adds a frame around the code
-tabsize=2,	                % sets default tabsize to 2 spaces
-captionpos=b,                   % sets the caption-position to bottom
-breaklines=true,                % sets automatic line breaking
-breakatwhitespace=false,        % sets if automatic breaks should only happen at whitespace
-escapeinside={\%*}{*)},         % if you want to add a comment within your code
-morekeywords={*,...}            % if you want to add more keywords to the set
+\lstset{
+        language=C++,
+        keywordstyle=\bfseries\ttfamily\color[rgb]{0,0,1},
+        identifierstyle=\ttfamily,
+        commentstyle=\color[rgb]{0.133,0.545,0.133},
+        stringstyle=\ttfamily\color[rgb]{0.627,0.126,0.941},
+        showstringspaces=false,
+        basicstyle=\small,
+        numberstyle=\footnotesize,
+        numbers=left,
+        stepnumber=1,
+        numbersep=10pt,
+        tabsize=2,
+        showspaces=false,
+        showstringspaces=false,
+        showtabs=false,
+        breaklines=true,
+        prebreak = \raisebox{0ex}[0ex][0ex]{\ensuremath{\hookleftarrow}},
+        breakatwhitespace=false,
+        breaklines=true,
+        aboveskip={1.5\baselineskip},
+        columns=fixed,
+        upquote=true,
+        extendedchars=true,
+        frame=single,
+        backgroundcolor=\color{llb},
 }
 
-
+\newcommand{\emp}[1]{\textbf{\emph{#1}}}
 
 
 
@@ -107,291 +97,88 @@ morekeywords={*,...}            % if you want to add more keywords to the set
 \sffamily
 \maketitle
 
+\section{\color{db}Introduction}
 
 
-\section*{\color{db}Project Statement}
+
+\section{\color{db}Project Statement}
 Select any set of tools (gaming engines, libraries etc) and display gaming
 features involving one or more human characters. Minimum requirement is to have 
 character animation such as walking, running etc user-controlled and to
 demonstrate constraints on the motion. 
 
-\subsection*{\color{db}Overview of the submitted project}
-Lorem Ipsum
-% Features covered -
-% Skybox, terrain and textured walls
-% Character animation -- the model can stand still, walk around or run
-% Physics Engine - collision detection - model cannot walk into walls, power boosters blown up on collision
-% Overhead Display - we display score
+\subsection{\color{db}Overview of the submitted project}
+We present a maze-traversal game with the following features -
+\begin{itemize}
+\item Scenario that has a Skybox, tiled-terrain and textured walls. All of these are made using OpenSceneGraph.
+\item Character animation - the protagonist can stand still, walk around and run. The animations use Cal3D.
+\item Physics Engine - We detect collision between the model and the walls, the power boosters and take appropriate action.
+\item Dynamic Maze generation - we generate a new maze each time using a python script and add/remove power boosters dynamically.
+\item Callback-based, event-driven execution - we use callbacks to process events such as collision detection. Callbacks are also used in the Bullet Physics framework to process events on every simulation tick.
+\item Heads Up Display - to provide on-screen help to the player and to display the score.
+\item Initial Splash Screen - this is done using OpenSceneGraph's support for switches.
+\end{itemize}
 
-\subsection*{\color{db}Libraries used}
+
+
+
+\section{\color{db}Background}
+\subsection{\color{db}Libraries used}
 \begin{itemize}
 \item \textbf{OpenSceneGraph - v.2.8.0 : } Library for rendering scene data - terrain and skyboxes 
 \item \textbf{Cal3d - v0.11 : } Library for character models (mesh data) and animation control
 \item \textbf{BulletPhysics - v2.77 : } Physics engine for collision detection and dynamics implementation
 \end{itemize}
 
-\section*{Details of the game graphics}
-\subsection*{The SceneGraph flowchart}
-\subsection*{Screenshots}
+
+
+
+\section{\color{db}Work Done}
+\subsection{\color{db}Details of the game graphics}
+\subsubsection{\color{db}The SceneGraph flowchart}
+
+\subsection{\color{db}Details of the physics backend}
+Bullet Physics is a dynamics engine that provides support for collision detection, rigid body dynamics and constrained motion. In the beginning of the program, we create a \emp{btDynamicsWorld} - this is the encompassing entity that keeps tracks of all the physics objects in the system, performs the simulation each cycle and updates the position and velocity values of all the rigid bodies. \\
+A \emp{btRigidBody} is created corresponding to each object we are interested in. In this case, we have a btRigidBody corresponding to the model, each of the walls and the power-ups.  \\
+The \emp{btDynamicsWorld} includes a \emp{btAxisSweep} broadphase, a constraint solver and collision dispatcher. The dispatcher keeps a list of all colliding objects at any simulation instant which can be queried.
+
+
+\subsubsection{\color{db}Updating the scene every instant}
+On very simulation tick, Bullet Physics looks up the previous configuration of the rigid body corresponding to the OSG body in the graph. It needs to know the initial positions and velocities of all bodies. The dispatcher uses custom collision-detection algorithms for each pair of bodies in the list and then the collisions can be processed. The updated position and velocities are made available by Bullet in the form of a GL matrix which can be passed on to OSG to draw the corresponding object.
+\begin{lstlisting}
+
+btDefaultMotionState* myMotionState = (btDefaultMotionState*) _body->getMotionState();
+myMotionState->m_graphicsWorldTrans.getOpenGLMatrix(m);
+
+osg::Matrixf mat(m);
+
+osg::PositionAttitudeTransform *pat = dynamic_cast<osg::PositionAttitudeTransform *> (node);
+pat->setPosition(mat.getTrans());
+pat->setAttitude(mat.getRotate());
+
+osg::Vec3 position = pat->getPosition();
+
+\end{lstlisting}
+
+\subsubsection{\color{db}Collision Detection}
+
+
+
+% Phart on how bullet physics interacts with OSG  with example
+% How it updates the coordinates and motion info for OSG to draw
+% Collision detection and callbacks that get activated
+
+
+\section{\color{db}Results}
+\subsection{\color{db}Screenshots}
 Lorem Ipsum
 % One for the starting screen
 % One for the character animations
 % One for within the maze - preferably with a powerup on top
 
-\section*{Details of the physics backend}
-Lorem Ipsum 
-% Phart on how bullet physics interacts with OSG  with example
 
-\section*{Code Snippets}
-Lorem Ipsum 
-
-
-\section{\color{db}Result data and code}
-\subsection{\color{db}Result Data}
-All the results are available in the submitted folder in the files name block$<size>$\_results.txt. The following table presents a comparison for some sizes - \\
-\begin{tabular}{| l|l|l|l|}
-Size & Blocking & Naive & Speedup \\ 
-256  & 0.069356 & 0.069356 & 1.513   \\         
-512  & 0.580515 & 0.580515 & 2.645  \\
-768  & 1.949473 & 1.949473 & 3.100  \\
-1024 &  5.685684 & 5.685684 &  3.70  \\
-1280 &  9.447211 & 9.447211 &  4.90  \\ 
-1536 &  16.804868 & 16.804868 &  5.085 \\
-1792 &  25.983063 & 25.983063 & 5.435 \\
-2048 &  56.567231 & 56.567231 & 3.845  \\
-2304 &  55.255916 & 55.255916 & 5.707 \\
-2560 &  77.798290 & 77.798290 & 5.733 \\
-
-\end{tabular}
-\clearpage
-\subsection{\color{db}Code}
-\begin{lstlisting}
-
-/*
- * Copyright (C) 2010 Kirtika B Ruchandani <kirtibr@gmail.com> 
- * 
- * You may redistribute it and/or modify it under the terms of the
- * GNU General Public License, as published by the Free Software
- * Foundation; either version 2 of the License, or (at your option)
- * any later version.
- * 
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU General Public License for more details.
- * 
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, write to:
- * 	The Free Software Foundation, Inc.,
- * 	51 Franklin Street, Fifth Floor
- * 	Boston, MA  02110-1301, USA.
- */
-
-#include <stdio.h>
-#include <iostream>
-#include <stdlib.h>
-#include <sys/time.h>
-
-using namespace std;
-
-#define BLOCK_SIZE 256
-
-class Matrix
-{
-
-    public:
-        int** matPtr;
-        int dimSize;
-        int numBlocks;
-
-        // Allocates a matrix and initialises elements to 0
-        Matrix(int size)
-        { 
-            this->dimSize = size;
-            this->numBlocks = (this->dimSize)/BLOCK_SIZE;
-            this->matPtr  = (int**)malloc(sizeof(int*)*dimSize);
-            int j,k;
-            for (j=0;j<dimSize;j++)
-                *(matPtr + j) = (int*) malloc(sizeof(int)*dimSize);
-
-            for (j=0;j<this->dimSize;j++)
-            {
-                for (k=0;k<this->dimSize;k++)
-                {
-                    this->matPtr[j][k] = 0;
-                }
-            }
-        }
-
-        void AddBlockToSelf(Matrix block,int xIdx,int yIdx)
-        {
-            if (block.dimSize != BLOCK_SIZE)
-            {
-                cout << "Invalid block" << endl;
-                exit(0);
-            }
-
-            int j,k;
-            for (j=0;j<BLOCK_SIZE;j++)
-            {
-                for (k=0;k<BLOCK_SIZE;k++)
-                {
-                    (this->matPtr)[xIdx*BLOCK_SIZE + j][yIdx*BLOCK_SIZE +k] += (block.matPtr)[j][k];
-                }
-            }
-        }
-
-
-
-        Matrix GetBlock(int xIdx,int yIdx)
-        {
-            Matrix result(BLOCK_SIZE);
-            result.dimSize = BLOCK_SIZE;
-            result.numBlocks = 1;
-            int j,k;
-            for (j=0;j<BLOCK_SIZE;j++)
-            {
-                for (k=0;k<BLOCK_SIZE;k++)
-                {
-                    result.matPtr[j][k]  += (this->matPtr)[xIdx*BLOCK_SIZE + j][yIdx*BLOCK_SIZE +k] ;
-                }
-            }
-            return result;
-        }
-
-        void TestPopulate(void)
-        {
-            int j,k;
-            for (j=0;j<this->dimSize;j++)
-            {
-                for (k=0;k<this->dimSize;k++)
-                {
-                    this->matPtr[j][k] = (j+k);
-                }
-            }
-        }
-
-
-        void BlockMultiply(Matrix A, int AXIdx, int AYIdx, Matrix B, int BXIdx, int BYIdx, int resXIdx, int resYIdx)
-        {
-            if ((A.dimSize != B.dimSize))
-            {
-                cout << "Sizes dont match." << endl;
-                exit(0);
-            }
-
-            int j,k,l;
-
-
-            for (j=0;j<BLOCK_SIZE;j++)
-            {
-                for (k=0;k<BLOCK_SIZE;k++)
-                {
-                    for (l=0;l<BLOCK_SIZE;l++)
-                    {
-                        this->matPtr[resXIdx*BLOCK_SIZE + j][ resYIdx*BLOCK_SIZE + k] += A.matPtr[AXIdx*BLOCK_SIZE + j][ AYIdx*BLOCK_SIZE +l] * B.matPtr[ BXIdx*BLOCK_SIZE + l][ BYIdx*BLOCK_SIZE +k]; 
-                    }
-                }
-            }
-
-        }
-
-
-        void Print(void)
-        {
-            int j,k;
-            for (j=0;j<this->dimSize;j++)
-            {
-                for (k=0;k<this->dimSize;k++)
-                {
-                    cout << this->matPtr[j][k] ;
-                }
-                fflush(stdout);
-                cout << "\n" ;
-            }
-
-        }
-
-};
-
-
-
-Matrix Multiply(Matrix A, Matrix B)
-{
-    if (A.dimSize != B.dimSize)
-    {
-        cout << "Sizes dont match" << endl;
-        exit(0);
-    }
-
-    Matrix result(A.dimSize);
-    int j,k,l;
-    for (j=0;j<A.numBlocks;j++)
-    {
-        for (k=0;k<A.numBlocks;k++)
-        {
-            for (l=0;l<A.numBlocks;l++)
-            {
-                result.BlockMultiply(A,j,l,B,l,k ,j,k);
-            }    
-        }
-    } 
-
-    return result;
-}
-
-
-Matrix NaiveMultiply(Matrix A, Matrix B)
-{
-    if (A.dimSize != B.dimSize)
-    {
-        cout << "Sizes dont match" << endl;
-        exit(0);
-    }
-
-    Matrix result(A.dimSize);
-    int j,k,l;
-    for (j=0;j<A.dimSize;j++)
-    {
-        for (k=0;k<A.dimSize;k++)
-        {
-            for (l=0;l<A.dimSize;l++)
-            {
-                (result.matPtr)[j][k] += (A.matPtr)[j][l]*(B.matPtr)[l][k];
-            }    
-        }
-    } 
-
-    return result;
-}
-
-
-
-
-
-int main(int argc, char **argv)
-{
-    if (argc != 2)
-    {
-        cout << "Usage: " << argv[0] << "  <size of matrix>" << endl;
-        exit(0);
-    }
-    Matrix myMat(atoi(argv[1]));
-    myMat.TestPopulate();
-    
-    timeval tim;
-    gettimeofday(&tim, NULL);
-    double t1=tim.tv_sec+(tim.tv_usec/1000000.0);
-    Matrix result = NaiveMultiply(myMat,myMat);
-    gettimeofday(&tim, NULL);
-    double t2=tim.tv_sec+(tim.tv_usec/1000000.0);
-    printf("%6d\t%.6lf\n", atoi(argv[1]),t2-t1);
-    //result.Print();
-    return 0;
-}
-\end{lstlisting}
-
-
+\section{\color{db}Conclusion}
+\section{\color{db}References}
 
 
 
