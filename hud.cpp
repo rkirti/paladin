@@ -3,6 +3,8 @@
 #include <iostream>
 #include <sstream>
 
+#include <osg/Switch>
+
 HUDElement::HUDElement(osg::Group* root, int width, int height)
 {
 mHUDProjectionMatrix = new osg::Projection();
@@ -139,7 +141,7 @@ void HUDElement::DisplayScore()
 
 void HUDElement::DisplayInitScreen()
 {
-    osg::Geode* HUDGeode = new osg::Geode;
+    HUDGeode = new osg::Geode;
 
     // Set up geometry for the HUD and add it to the HUD
        osg::Geometry* HUDBackgroundGeometry = new osg::Geometry();
@@ -199,6 +201,14 @@ void HUDElement::DisplayInitScreen()
        // in numerical order so set bin number to 11
        HUDStateSet->setRenderBinDetails( 13, "RenderBin");
 
-       mHUDModelViewMatrix->addChild(HUDGeode);
+       swt = new osg::Switch;
+       mHUDModelViewMatrix->addChild(swt);
+       swt->addChild(HUDGeode, true);
        // swt
+}
+
+
+void HUDElement::RemoveInitScreen()
+{
+    swt->setChildValue(HUDGeode, false);
 }

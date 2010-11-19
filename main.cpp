@@ -36,9 +36,9 @@ HUDElement* hud;;
 
 int main(int argc, char** argv)
 {
-    if(argc < 3)
+    if(argc < 2)
     {
-        std::cout << "Usage: "<< argv[0]<<" path_to_cal3d.cfg follow_camera?(1 or 0)\n";
+        std::cout << "Usage: "<< argv[0]<<" path_to_cal3d.cfg \n";
         exit(0);
     }
  
@@ -90,7 +90,7 @@ int main(int argc, char** argv)
 	hud->DefineHUDQuad( 1200, 150, 600, 75, "data/floor.png", 11);
     
     // Keyboard handler
-    viewer.addEventHandler( new AnimationToggleHandler( model , &palPos));
+    viewer.addEventHandler( new AnimationToggleHandler( model , &palPos , &viewer));
 
     // Add the scene graph to the viewer
     viewer.setSceneData(root);
@@ -152,9 +152,9 @@ int main(int argc, char** argv)
     viewer.addEventHandler(new osgViewer::ScreenCaptureHandler);
 
     // Make the camera follow the model if the user asked for it
-    int followCamera = atoi(argv[2]);
-    if(followCamera)
-        followTheModel(&viewer, model);
+    // int followCamera = atoi(argv[2]);
+    // if(followCamera)
+    followTheModel(&viewer, model);
 
     // Set initial position of the camera
     viewer.getCameraManipulator()->setHomePosition( osg::Vec3(0, 500, 200), osg::Vec3(0, 0, 200), osg::Vec3(0, 0, 1),  false );

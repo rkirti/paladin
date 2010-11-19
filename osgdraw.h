@@ -44,11 +44,13 @@ class AnimationToggleHandler : public osgGA::GUIEventHandler
 {
     public: 
 
-        AnimationToggleHandler( osgCal::Model* m, palladinPosition *palPosPtr)
+        AnimationToggleHandler( osgCal::Model* m, palladinPosition *palPosPtr, osgViewer::Viewer* viewerPtr)
             : model( m )
             , currentAnimation( -1 )
         {
             palPos = palPosPtr;
+            viewer = viewerPtr;
+            cameraPos = 0;
         }
         
         bool handle(const osgGA::GUIEventAdapter& ea, osgGA::GUIActionAdapter& aa);
@@ -60,6 +62,8 @@ class AnimationToggleHandler : public osgGA::GUIEventHandler
         // std::vector< std::string >  animationNames;
         int                         currentAnimation;
         palladinPosition *palPos;
+        osgViewer::Viewer *viewer;
+        int cameraPos;
 };
 
 #endif 

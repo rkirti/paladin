@@ -34,6 +34,7 @@ public:
         DisplayScore();
     }
 void DisplayInitScreen();
+void RemoveInitScreen();
     
 
 private:
@@ -50,6 +51,7 @@ private:
 	osg::Matrix mMtx;
     osgText::Text* textOne;
     osg::Switch *swt;
+    osg::Geode *HUDGeode;
     int score;
 	int mPosX;
 	int mPosY;

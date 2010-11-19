@@ -9,9 +9,13 @@
 #include <fstream>
 #include <iostream>
 
+#include "hud.h"
+
 // btRigidBody* tempWall;
 
 using std::ifstream;
+
+extern HUDElement* hud;; 
 
 // osg::ref_ptr<osg::Switch> powerUpSwitch; 
 osg::ref_ptr<osg::Geode> basicShapesGeode; 
@@ -226,6 +230,9 @@ osg::ref_ptr<osg::Switch> createPowerUp(int x, int y, int z)
     osg::ref_ptr<osg::Switch> swt= new osg::Switch;
     swt->addChild(geode.get(), true);
 
+
+    drawable->setColor(osg::Vec4(1,0,0,1));
+
     // Rigid body
     createRigidPowerUp(btVector3(x,y,z), rad, swt, geode);
 
@@ -238,9 +245,17 @@ osg::ref_ptr<osg::Group> createPowerUps()
 
     osg::ref_ptr<osg::Group> grp = new osg::Group;
 
-    grp->addChild(createPowerUp(-100, -100, 100));
-    grp->addChild(createPowerUp(-200, -200, 100));
+    ifstream mazePUFile;
+    // mazeFile.open("./mazeFiles/maze-1.txt");
+    mazePUFile.open("./mazeFiles/powerup-map.txt");
+    while (mazePUFile.good())
+    {   
+        int posX, posY, posZ;
 
+        mazePUFile >> posX >> posY >> posZ;
+
+        grp->addChild(createPowerUp(posX, posY, posZ));
+    }
     return grp;
 
 }
@@ -325,6 +340,32 @@ bool AnimationToggleHandler::handle(const osgGA::GUIEventAdapter& ea, osgGA::GUI
                 {
                     if(rigidModel->getCenterOfMassPosition().getZ() == 0)
                         rigidModel->applyCentralImpulse(btVector3(0,0,20000));
+                }
+                else if(ea.getKey() == 'c')
+                {
+
+                    if(cameraPos == 0)
+                    {
+                        viewer->getCameraManipulator()->setHomePosition(osg::Vec3(0, 0, 2000), osg::Vec3(0, 0, 0), osg::Vec3(0, -1, 0),  false );
+                    }
+                    else if(cameraPos == 1)
+                    {
+                        viewer->getCameraManipulator()->setHomePosition( osg::Vec3(0, 300, 200), osg::Vec3(0, 0, 200), osg::Vec3(0, 0, 1),  false );
+                    }
+                    else if(cameraPos == 2)
+                    {
+                        viewer->getCameraManipulator()->setHomePosition(osg::Vec3(0,-200, 700),osg::Vec3(0, -300, 700), osg::Vec3(0, 0, 1),  false );
+                    }
+
+                    cameraPos = (cameraPos+1)%2;
+
+                    viewer->home(); 
+
+                }
+
+                else if(ea.getKey() == osgGA::GUIEventAdapter::KEY_Return)
+                {
+                    hud->RemoveInitScreen();
                 }
 
                 break;
