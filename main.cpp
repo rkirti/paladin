@@ -157,7 +157,7 @@ int main(int argc, char** argv)
     followTheModel(&viewer, model);
 
     // Set initial position of the camera
-    viewer.getCameraManipulator()->setHomePosition( osg::Vec3(0, 500, 200), osg::Vec3(0, 0, 200), osg::Vec3(0, 0, 1),  false );
+    viewer.getCameraManipulator()->setHomePosition( osg::Vec3(0, 600, 800), osg::Vec3(0, 0, 300), osg::Vec3(0, 0, 1),  false );
     viewer.home(); 
 
     // create the windows and run the threads.

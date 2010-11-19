@@ -96,7 +96,7 @@ void HUDElement::DefineHUDQuad(osg::Vec3 ll_corner, osg::Vec3 ul_corner, osg::Ve
 
    // Set up the parameters for the text we'll add to the HUD:
    textOne->setCharacterSize(25);
-   textOne->setFont("../../impact.ttf");
+   textOne->setFont("data/impact.ttf");
 
    DisplayScore();
 
@@ -104,6 +104,18 @@ void HUDElement::DefineHUDQuad(osg::Vec3 ll_corner, osg::Vec3 ul_corner, osg::Ve
    textOne->setPosition(osg::Vec3(-500,0,-1.5) );
    //textOne->setColor(osg::Vec4(199, 77, 15, 1) );
    textOne->setColor(osg::Vec4(199, 77, 15, 1) );
+
+   // Help contents 
+   osgText::Text *helpText = new osgText::Text;
+   mHUDGeode->addDrawable(helpText);
+   helpText->setAxisAlignment(osgText::Text::SCREEN);
+   helpText->setPosition(osg::Vec3(100, 50, -1.5));
+   helpText->setColor(osg::Vec4(199, 77, 15, 1) );
+   helpText->setCharacterSize(20);
+   helpText->setFont("data/impact.ttf");
+
+   helpText->setText("'h' : Display On Screen Help \n'c' : Toggle Camera Position \n'z' : Jump \nUp : Move forward \nLeft,Right : Turn \nEsc : Quit");
+
 
    mPosX=posx;
    mPosY=posy;

@@ -326,7 +326,8 @@ bool AnimationToggleHandler::handle(const osgGA::GUIEventAdapter& ea, osgGA::GUI
                     // m_dynamicsWorld->setGravity(btVector3(0,0,-500));
                     // rigidModel->applyCentralImpulse(btVector3(0,0,20000));
 
-                     palPos->increementAngle();
+                    //  palPos->increementAngle();
+                    palPos->startLeft();
                     // currentAngle += 0.05;
                     // rigidModel->setLinearVelocity(btVector3(100*sin(currentAngle),-100*cos(currentAngle),0));
                 }
@@ -334,12 +335,13 @@ bool AnimationToggleHandler::handle(const osgGA::GUIEventAdapter& ea, osgGA::GUI
                 {
                     /// currentAngle -= 0.05;
                     // rigidModel->setLinearVelocity(btVector3(100*sin(currentAngle),-100*cos(currentAngle),0));
-                    palPos->decreementAngle();
+                    // palPos->decreementAngle();
+                    palPos->startRight();
                 }
-                else if( ea.getKey() == ' ')
+                else if( ea.getKey() == 'z')
                 {
                     if(rigidModel->getCenterOfMassPosition().getZ() == 0)
-                        rigidModel->applyCentralImpulse(btVector3(0,0,20000));
+                        rigidModel->applyCentralImpulse(btVector3(0,0,30000));
                 }
                 else if(ea.getKey() == 'c')
                 {
@@ -350,14 +352,14 @@ bool AnimationToggleHandler::handle(const osgGA::GUIEventAdapter& ea, osgGA::GUI
                     }
                     else if(cameraPos == 1)
                     {
-                        viewer->getCameraManipulator()->setHomePosition( osg::Vec3(0, 300, 200), osg::Vec3(0, 0, 200), osg::Vec3(0, 0, 1),  false );
+                        viewer->getCameraManipulator()->setHomePosition( osg::Vec3(0, 600, 800), osg::Vec3(0, 0, 300), osg::Vec3(0, 0, 1),  false );
                     }
                     else if(cameraPos == 2)
                     {
-                        viewer->getCameraManipulator()->setHomePosition(osg::Vec3(0,-200, 700),osg::Vec3(0, -300, 700), osg::Vec3(0, 0, 1),  false );
+                        viewer->getCameraManipulator()->setHomePosition(osg::Vec3(0,200, 200),osg::Vec3(0, 0, 200), osg::Vec3(0, 0, 1),  false );
                     }
 
-                    cameraPos = (cameraPos+1)%2;
+                    cameraPos = (cameraPos+1)%3;
 
                     viewer->home(); 
 
@@ -381,6 +383,14 @@ bool AnimationToggleHandler::handle(const osgGA::GUIEventAdapter& ea, osgGA::GUI
 
                     // rigidModel->setLinearVelocity(btVector3(0,0,0));
                     palPos->stopAdvance();
+                }
+                else if( ea.getKey() == osgGA::GUIEventAdapter::KEY_Left)
+                {
+                    palPos->stopLeft();
+                }
+                else if( ea.getKey() == osgGA::GUIEventAdapter::KEY_Right)
+                {
+                    palPos->stopRight();
                 }
             }
         default: break;

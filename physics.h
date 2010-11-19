@@ -147,6 +147,10 @@ class ModelUpdateCallback: public osg::NodeCallback
 
             std::cout << position.x() << " "<< position.y() << " "<< position.z() << " "<<  "\n";
 
+            if(palPos->left)
+                palPos->increementAngle();
+            if(palPos->right)
+                palPos->decreementAngle();
 
             osg::Vec3 axis(0,0,1);
             osg::Quat att(palPos->currentAngle,axis);
