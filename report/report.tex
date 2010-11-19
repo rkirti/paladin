@@ -1,0 +1,407 @@
+\documentclass[a4paper]{article}
+\usepackage[ps2pdf]{thumbpdf}
+\usepackage{graphicx}   
+\usepackage{listings}
+\usepackage{palatino}
+\usepackage{color}
+
+\usepackage[
+  ps2pdf,
+  pagebackref,
+  pdfpagelabels,
+  extension=pdf,
+]{hyperref}
+
+
+\hypersetup{ 
+  pdftitle          = {CS6360 Project},
+  pdfsubject        = {CS6360 Project},
+  pdfauthor         = {Immanuel Ilavarasan Thomas,Kirtika Ruchandani},
+  pdfkeywords       = {},
+  pdfcreator        = {ps2pdf with Ghostscript},
+  pdfproducer       = {LaTeX with hyperref and thumbpdf},
+  bookmarks         = true,
+  bookmarksopen     = true,
+  bookmarksnumbered = true,
+  pdfstartpage      = {1},
+  pdfpagemode       = UseThumbs,
+  colorlinks        = true,
+  linkcolor         = red,
+  anchorcolor       = red,
+  citecolor         = blue,
+  filecolor         = red,
+  pagecolor         = red,
+  urlcolor          = red
+}
+
+
+%\def\codefont{
+%  \fontspec{Courier New}
+%  \fontsize{9pt}{11pt}\selectfont}
+%\newenvironment{code}
+%{\begin{center}
+%    \begin{tikzpicture}
+%      \node [fill=lb,rounded corners=5pt]
+%      \bgroup
+%      \bgroup\codefont
+%      \begin{tabular}{l}}
+%      {\end{tabular}
+%      \egroup
+%      \egroup;
+%    \end{tikzpicture}
+%  \end{center}}
+
+% Colors
+\definecolor{gold}{rgb}{0.85,.66,0}
+\definecolor{db}{rgb}{0,0.08,0.45} 
+\definecolor{lb}{rgb}{0.8,0.85,1}
+\definecolor{grey}{gray}{0.4}
+
+
+
+
+\lstset{ %
+language=C,                % choose the language of the code
+basicstyle=\footnotesize,       % the size of the fonts that are used for the code
+numbers=left,                   % where to put the line-numbers
+numberstyle=\footnotesize,      % the size of the fonts that are used for the line-numbers
+stepnumber=2,                   % the step between two line-numbers. If it's 1 each line 
+                                % will be numbered
+numbersep=5pt,                  % how far the line-numbers are from the code
+backgroundcolor=\color{lb},  % choose the background color. You must add \usepackage{color}
+showspaces=false,               % show spaces adding particular underscores
+showstringspaces=false,         % underline spaces within strings
+showtabs=false,                 % show tabs within strings adding particular underscores
+frame=single,	                % adds a frame around the code
+tabsize=2,	                % sets default tabsize to 2 spaces
+captionpos=b,                   % sets the caption-position to bottom
+breaklines=true,                % sets automatic line breaking
+breakatwhitespace=false,        % sets if automatic breaks should only happen at whitespace
+escapeinside={\%*}{*)},         % if you want to add a comment within your code
+morekeywords={*,...}            % if you want to add more keywords to the set
+}
+
+
+
+
+
+% Page layout
+\oddsidemargin 0.0in
+\textwidth 6.5in
+\headheight 0.0in
+\topmargin 0.0in
+\textheight 9.2in
+\headsep 0.0in
+
+% Macros
+\def \defbox #1{
+\colorbox{lb}{\parbox{5in}{#1}}
+}
+
+\title{\color{db} \textbf{CS6360 Project: Demonstrating of Gaming Features}}
+\author{Immanuel Ilavarasan Thomas, CS07B006 \\  Kirtika Ruchandani, CS07B040}
+
+
+\begin{document}
+
+\sffamily
+\maketitle
+
+
+
+\section*{\color{db}Project Statement}
+Select any set of tools (gaming engines, libraries etc) and display gaming
+features involving human characters. Minimum requirements is to have the
+character animation such as walking, running etc user-controlled and to
+demonstrate constraints on the motion. 
+
+\subsection*{\color{db}Overview of the submitted project}
+Lorem Ipsum
+
+\subsection*{\color{db}Libraries used}
+\begin{itemize}
+\item \textbf{OpenSceneGraph - v.2.8.0 : } Library for rendering scene data
+- terrain and skyboxes 
+\item \textbf{Cal3d - v0.11 : } Library for character models (mesh data) and animation control
+\item \textbf{BulletPhysics - v2.77 : } Physics engine for collision detection
+and dynamics implementation
+\end{itemize}
+
+
+\section{\color{db}Logic Used}
+We divide the matrix in NxN blocks. The block size is determined by experimentation - we need to get the maximum size such that 3 blocks can fit in the cache.
+A block size of 256 does well till about 4096, after which it does not work. Since the cache is known to be 512 KB (L1), known using dmidecode, a smaller block size is tried.
+Now, consider all the blocks being given indexes with respect to x and y offsets. Therefore the first block is 0,0. To get the i,j block of the resultant matrix, we multiply
+$A_i,k$ and $B_k,j$ where k varies from 1 to number of blocks. The sum of all these partial products gives the block in the resultant matrix.
+
+\section{\color{db}System configuration}
+\begin{itemize}
+\item \textbf{Compilation options:} In all the cases, the code with compiled with -O3 option.
+\item \textbf{Processor:} The system is a dual-core AMD processor with each core running at a maximum frequency of 1.8 GHz. 
+\item \textbf{Caches:} The system has a 64 KB instruction cache and a 64KB data cache for the L1 cache. The L2 cache is 256 KB in size.
+The cache line size is 64 bytes for all. The L1 caches have 512 sets and are 2-way associative. The L2 cache is 16 way associative.
+\end{itemize}
+
+
+\clearpage
+\subsection{\color{grey}Results}
+The red plot shows the naive version of the algorithm. The other three are with blocking, testing different block sizes. The violet one is for block size 256,
+the green one for 128 and the last one for block size 64. One can see that 128 is the optimal block size- since the move from 256 to 128 shows significant performance improvement, 
+but the one from 128 to 64 doesn't show any improvement except at the kink at 2048.
+The spike at 2048 cannot be accounted for by the author - it corresponds to a matrix size of 16MB. 
+
+
+
+
+\section{\color{db}Result data and code}
+\subsection{\color{db}Result Data}
+All the results are available in the submitted folder in the files name block$<size>$\_results.txt. The following table presents a comparison for some sizes - \\
+\begin{tabular}{| l|l|l|l|}
+Size & Blocking & Naive & Speedup \\ 
+256  & 0.069356 & 0.069356 & 1.513   \\         
+512  & 0.580515 & 0.580515 & 2.645  \\
+768  & 1.949473 & 1.949473 & 3.100  \\
+1024 &  5.685684 & 5.685684 &  3.70  \\
+1280 &  9.447211 & 9.447211 &  4.90  \\ 
+1536 &  16.804868 & 16.804868 &  5.085 \\
+1792 &  25.983063 & 25.983063 & 5.435 \\
+2048 &  56.567231 & 56.567231 & 3.845  \\
+2304 &  55.255916 & 55.255916 & 5.707 \\
+2560 &  77.798290 & 77.798290 & 5.733 \\
+
+\end{tabular}
+\clearpage
+\subsection{\color{db}Code}
+\begin{lstlisting}
+
+/*
+ * Copyright (C) 2010 Kirtika B Ruchandani <kirtibr@gmail.com> 
+ * 
+ * You may redistribute it and/or modify it under the terms of the
+ * GNU General Public License, as published by the Free Software
+ * Foundation; either version 2 of the License, or (at your option)
+ * any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * See the GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, write to:
+ * 	The Free Software Foundation, Inc.,
+ * 	51 Franklin Street, Fifth Floor
+ * 	Boston, MA  02110-1301, USA.
+ */
+
+#include <stdio.h>
+#include <iostream>
+#include <stdlib.h>
+#include <sys/time.h>
+
+using namespace std;
+
+#define BLOCK_SIZE 256
+
+class Matrix
+{
+
+    public:
+        int** matPtr;
+        int dimSize;
+        int numBlocks;
+
+        // Allocates a matrix and initialises elements to 0
+        Matrix(int size)
+        { 
+            this->dimSize = size;
+            this->numBlocks = (this->dimSize)/BLOCK_SIZE;
+            this->matPtr  = (int**)malloc(sizeof(int*)*dimSize);
+            int j,k;
+            for (j=0;j<dimSize;j++)
+                *(matPtr + j) = (int*) malloc(sizeof(int)*dimSize);
+
+            for (j=0;j<this->dimSize;j++)
+            {
+                for (k=0;k<this->dimSize;k++)
+                {
+                    this->matPtr[j][k] = 0;
+                }
+            }
+        }
+
+        void AddBlockToSelf(Matrix block,int xIdx,int yIdx)
+        {
+            if (block.dimSize != BLOCK_SIZE)
+            {
+                cout << "Invalid block" << endl;
+                exit(0);
+            }
+
+            int j,k;
+            for (j=0;j<BLOCK_SIZE;j++)
+            {
+                for (k=0;k<BLOCK_SIZE;k++)
+                {
+                    (this->matPtr)[xIdx*BLOCK_SIZE + j][yIdx*BLOCK_SIZE +k] += (block.matPtr)[j][k];
+                }
+            }
+        }
+
+
+
+        Matrix GetBlock(int xIdx,int yIdx)
+        {
+            Matrix result(BLOCK_SIZE);
+            result.dimSize = BLOCK_SIZE;
+            result.numBlocks = 1;
+            int j,k;
+            for (j=0;j<BLOCK_SIZE;j++)
+            {
+                for (k=0;k<BLOCK_SIZE;k++)
+                {
+                    result.matPtr[j][k]  += (this->matPtr)[xIdx*BLOCK_SIZE + j][yIdx*BLOCK_SIZE +k] ;
+                }
+            }
+            return result;
+        }
+
+        void TestPopulate(void)
+        {
+            int j,k;
+            for (j=0;j<this->dimSize;j++)
+            {
+                for (k=0;k<this->dimSize;k++)
+                {
+                    this->matPtr[j][k] = (j+k);
+                }
+            }
+        }
+
+
+        void BlockMultiply(Matrix A, int AXIdx, int AYIdx, Matrix B, int BXIdx, int BYIdx, int resXIdx, int resYIdx)
+        {
+            if ((A.dimSize != B.dimSize))
+            {
+                cout << "Sizes dont match." << endl;
+                exit(0);
+            }
+
+            int j,k,l;
+
+
+            for (j=0;j<BLOCK_SIZE;j++)
+            {
+                for (k=0;k<BLOCK_SIZE;k++)
+                {
+                    for (l=0;l<BLOCK_SIZE;l++)
+                    {
+                        this->matPtr[resXIdx*BLOCK_SIZE + j][ resYIdx*BLOCK_SIZE + k] += A.matPtr[AXIdx*BLOCK_SIZE + j][ AYIdx*BLOCK_SIZE +l] * B.matPtr[ BXIdx*BLOCK_SIZE + l][ BYIdx*BLOCK_SIZE +k]; 
+                    }
+                }
+            }
+
+        }
+
+
+        void Print(void)
+        {
+            int j,k;
+            for (j=0;j<this->dimSize;j++)
+            {
+                for (k=0;k<this->dimSize;k++)
+                {
+                    cout << this->matPtr[j][k] ;
+                }
+                fflush(stdout);
+                cout << "\n" ;
+            }
+
+        }
+
+};
+
+
+
+Matrix Multiply(Matrix A, Matrix B)
+{
+    if (A.dimSize != B.dimSize)
+    {
+        cout << "Sizes dont match" << endl;
+        exit(0);
+    }
+
+    Matrix result(A.dimSize);
+    int j,k,l;
+    for (j=0;j<A.numBlocks;j++)
+    {
+        for (k=0;k<A.numBlocks;k++)
+        {
+            for (l=0;l<A.numBlocks;l++)
+            {
+                result.BlockMultiply(A,j,l,B,l,k ,j,k);
+            }    
+        }
+    } 
+
+    return result;
+}
+
+
+Matrix NaiveMultiply(Matrix A, Matrix B)
+{
+    if (A.dimSize != B.dimSize)
+    {
+        cout << "Sizes dont match" << endl;
+        exit(0);
+    }
+
+    Matrix result(A.dimSize);
+    int j,k,l;
+    for (j=0;j<A.dimSize;j++)
+    {
+        for (k=0;k<A.dimSize;k++)
+        {
+            for (l=0;l<A.dimSize;l++)
+            {
+                (result.matPtr)[j][k] += (A.matPtr)[j][l]*(B.matPtr)[l][k];
+            }    
+        }
+    } 
+
+    return result;
+}
+
+
+
+
+
+int main(int argc, char **argv)
+{
+    if (argc != 2)
+    {
+        cout << "Usage: " << argv[0] << "  <size of matrix>" << endl;
+        exit(0);
+    }
+    Matrix myMat(atoi(argv[1]));
+    myMat.TestPopulate();
+    
+    timeval tim;
+    gettimeofday(&tim, NULL);
+    double t1=tim.tv_sec+(tim.tv_usec/1000000.0);
+    Matrix result = NaiveMultiply(myMat,myMat);
+    gettimeofday(&tim, NULL);
+    double t2=tim.tv_sec+(tim.tv_usec/1000000.0);
+    printf("%6d\t%.6lf\n", atoi(argv[1]),t2-t1);
+    //result.Print();
+    return 0;
+}
+\end{lstlisting}
+
+
+
+
+
+
+\end{document}
+
