@@ -1,11 +1,10 @@
-
 CC = g++
-CFLAGS = -I/usr/include/bullet
+CFLAGS = -I/usr/include/bullet -pg
 WFLAGS = -Wall 
-LDFLAGS = -losg -losgDB -losgViewer -losgCal -losgUtil -losgViewer -lBulletDynamics -lBulletCollision -lLinearMath
+LDFLAGS = -losg -losgDB -losgViewer -losgCal -losgUtil -losgViewer -lBulletDynamics -lBulletCollision -lLinearMath  -lOpenThreads
 
 
-demo: main.cpp movement.h physics.o skybox.o hud.o osgdraw.o
+demo: main.cpp hud.cpp osgdraw.cpp physics.cpp skybox.cpp
 	g++ $^ -o $@  $(LDFLAGS) $(CFLAGS) $(WFLAGS)
 
 %.o: %.cpp

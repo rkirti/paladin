@@ -141,7 +141,7 @@ class ModelUpdateCallback: public osg::NodeCallback
 
             osg::PositionAttitudeTransform *pat = dynamic_cast<osg::PositionAttitudeTransform *> (node);
             pat->setPosition(mat.getTrans());
-            pat->setAttitude(mat.getRotate());
+           pat->setAttitude(mat.getRotate());
 
             osg::Vec3 position = pat->getPosition();
 

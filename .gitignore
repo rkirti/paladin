@@ -4,3 +4,11 @@ demo
 tags
 cscope.out
 report.pdf
+*.swo
+*png
+*jpg
+*tag
+*txt
+*.log
+*.tga
+*.out

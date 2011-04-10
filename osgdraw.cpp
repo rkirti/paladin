@@ -7,6 +7,7 @@
 #include <osg/Texture>
 
 #include <fstream>
+#include <string.h>
 #include <iostream>
 
 #include "hud.h"
@@ -30,8 +31,8 @@ osg::ref_ptr<osg::Geode> createSide(osg::ref_ptr<osg::Vec3Array> corners, osg::r
     geom->setVertexArray( corners.get() );
     // Create an array of four colors.
 
-    int lengthX = ((*corners)[1] + (-(*corners)[0])).length();
-    int lengthY = ((*corners)[1] + (-(*corners)[2])).length();
+    int lengthX = (int)((*corners)[1] + (-(*corners)[0])).length();
+    int lengthY = (int)((*corners)[1] + (-(*corners)[2])).length();
     // std::cout << "Imageeeeeeeeeee " << image.get()->s() << "," << image.get()->t() << "\n";
     // std::cout << (*corners)[0].x() << ", " << (*corners)[0].y() << ", " <<(*corners)[0].z() << "\n";
     // std::cout << (*corners)[1].x() << ", " << (*corners)[1].y() << ", " <<(*corners)[1].z() << "\n";
@@ -116,7 +117,7 @@ osg::ref_ptr<osg::Group> createWall(int comX, int comY, int halfWidth, int halfT
 
     normal = new osg::Vec3Array;
     normal->push_back( osg::Vec3( 0.f, 1.f, 0.f ) );
-    wall->addChild(createSide(vertices, normal ,osgDB::readImageFile("./data/wall_light.TGA")));
+    wall->addChild(createSide(vertices, normal ,osgDB::readImageFile("./data/texture.tga")));
 
     // Neg Y face
     vertices = new osg::Vec3Array;
@@ -127,7 +128,7 @@ osg::ref_ptr<osg::Group> createWall(int comX, int comY, int halfWidth, int halfT
 
     normal = new osg::Vec3Array;
     normal->push_back( osg::Vec3( 0.f, -1.f, 0.f ) );
-    wall->addChild(createSide(vertices, normal ,osgDB::readImageFile("./data/wall_light.TGA")));
+    wall->addChild(createSide(vertices, normal ,osgDB::readImageFile("./data/texture.tga")));
 
     // Top
     vertices = new osg::Vec3Array;
@@ -138,7 +139,7 @@ osg::ref_ptr<osg::Group> createWall(int comX, int comY, int halfWidth, int halfT
 
     normal = new osg::Vec3Array;
     normal->push_back( osg::Vec3( 0.f, 0.f, 1.f ) );
-    wall->addChild(createSide(vertices, normal ,osgDB::readImageFile("./data/wall_light.TGA")));
+    wall->addChild(createSide(vertices, normal ,osgDB::readImageFile("./data/texture.tga")));
 
     // left 
     vertices = new osg::Vec3Array;
@@ -149,7 +150,7 @@ osg::ref_ptr<osg::Group> createWall(int comX, int comY, int halfWidth, int halfT
 
     normal = new osg::Vec3Array;
     normal->push_back( osg::Vec3( 1.f, 0.f, 0.f ) );
-    wall->addChild(createSide(vertices, normal ,osgDB::readImageFile("./data/wall_light.TGA")));
+    wall->addChild(createSide(vertices, normal ,osgDB::readImageFile("./data/texture.tga")));
 
     // right
     vertices = new osg::Vec3Array;
@@ -160,34 +161,43 @@ osg::ref_ptr<osg::Group> createWall(int comX, int comY, int halfWidth, int halfT
 
     normal = new osg::Vec3Array;
     normal->push_back( osg::Vec3(-1.f, 0.f, 0.f ) );
-    wall->addChild(createSide(vertices, normal ,osgDB::readImageFile("./data/wall_light.TGA")));
+    wall->addChild(createSide(vertices, normal ,osgDB::readImageFile("./data/texture.tga")));
 
     return wall;
 }
 
 // osg::ref_ptr<osg::Group> createWall(int comX, int comY, int halfWidth, int halfThickness, int height, int isXPointing)
 
+// Maze generation details- the python scripts generates a maze that is a quad
+// with vertices (0,0), (10,10) as endpoints. We scale up by a constant factor
+// of 400 and halfwidth fixed at 200
 osg::ref_ptr<osg::Group> createWalls()
 {
     osg::ref_ptr<osg::Group> grp = new osg::Group;
 
     ifstream mazeFile;
-    // mazeFile.open("./mazeFiles/maze-1.txt");
-    mazeFile.open("./mazeFiles/maze-custom.txt");
-    while (mazeFile.good())
+    mazeFile.open("./mazeFiles/mazeTest.txt");
+   // mazeFile.open("./mazeFiles/maze-custom.txt");
+    while (!mazeFile.eof())
     {   
         float CoMX,CoMY;
+        float acCoMX, acCoMY;
         char dir;
         int isXPointing;
         int halfWidth;
 
         mazeFile >> CoMX >> CoMY >> halfWidth >> dir;
+        std::cout << "Read the wall " << CoMX << CoMY << dir << "\n";
 
-        std::cout << CoMX << CoMY << dir << "\n";
+        acCoMX = CoMX*400 - 2000;
+        acCoMY = CoMY*400 - 2000;
+        
         if (dir == 'X') isXPointing = 1;
         else isXPointing = 0;
+        
+        std::cout << "Creating the wall " << acCoMX << acCoMY << "  " <<  isXPointing << std::endl;
 
-        grp->addChild(createWall(CoMX, CoMY, halfWidth, 10, 200, isXPointing));
+        grp->addChild(createWall((int)acCoMX, (int)acCoMY, 200, 10, 500, isXPointing));
     }
 
     // grp->addChild(createWall(0,0,100,5,200,0));
@@ -312,7 +322,6 @@ bool AnimationToggleHandler::handle(const osgGA::GUIEventAdapter& ea, osgGA::GUI
                 {
                     currentAnimation = '5'-'1';
 
-                    // model->blendCycle( currentAnimation, 1.0f, 0.0 );                        
                     model->blendCycle( currentAnimation, 1.0f, 1.0 );                        
 
                     // rigidModel->setLinearVelocity(btVector3(100*sin(currentAngle),-100*cos(currentAngle),0));
@@ -348,6 +357,7 @@ bool AnimationToggleHandler::handle(const osgGA::GUIEventAdapter& ea, osgGA::GUI
 
                     if(cameraPos == 0)
                     {
+                        // This is the top view.
                         viewer->getCameraManipulator()->setHomePosition(osg::Vec3(0, 0, 2000), osg::Vec3(0, 0, 0), osg::Vec3(0, -1, 0),  false );
                     }
                     else if(cameraPos == 1)

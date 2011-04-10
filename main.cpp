@@ -58,12 +58,18 @@ int main(int argc, char** argv)
     osg::ref_ptr<osg::Group> theFloor = createTerrain("data/floor.png");
     root->addChild(theFloor);
 
+    // Ceiling
+   // osg::ref_ptr<osg::Group> theCeiling = createCeiling("data/ceiling.png");
+   // root->addChild(theCeiling);
+
+
+
     // Model
     osg::ref_ptr<osgCal::Model> model = createModel(argv[1]);
 
     // Create a PAT which helps in moving the model around
     // Place the PAT at 0,0,0
-    osg::Vec3 newPos(0,0,0);
+    osg::Vec3 newPos(0,0,200);
     osg::PositionAttitudeTransform* pat =  new osg::PositionAttitudeTransform;
     pat->setPosition(newPos);
 
@@ -77,18 +83,23 @@ int main(int argc, char** argv)
     createPhysicsWorld();
 
     // interface between the keyboard handler and the update callback
+    // The palladinPosition class has all details of the model's motion
+    // and position and provides functions to change them.
     palladinPosition palPos;
 
     // Rigid bodies
     root->addChild(createWalls());
     createRigidModel(model,&palPos);
 
+    // Powerups
     root->addChild(createPowerUps());
     
-    // root->addChild(createHUD());
+    // HUD
 	hud = new HUDElement(root, 1200, 800);
 	hud->DefineHUDQuad( 1200, 150, 600, 75, "data/floor.png", 11);
     
+    
+
     // Keyboard handler
     viewer.addEventHandler( new AnimationToggleHandler( model , &palPos , &viewer));
 
@@ -98,17 +109,16 @@ int main(int argc, char** argv)
     // Set up the pat updates
     pat->setUpdateCallback(new ModelUpdateCallback(rigidModel, &palPos));
 
-    // Start the show
-    // viewer.run();
-
     // set up the camera manipulators.
     {
+        // This allows the camera manipulator to be switched at the press of a
+        // key
         osg::ref_ptr<osgGA::KeySwitchMatrixManipulator> keyswitchManipulator = new osgGA::KeySwitchMatrixManipulator;
 
         keyswitchManipulator->addMatrixManipulator('1', "Trackball", new osgGA::TrackballManipulator());
-        keyswitchManipulator->addMatrixManipulator('2', "Flight", new osgGA::FlightManipulator());
-        keyswitchManipulator->addMatrixManipulator('3', "Drive", new osgGA::DriveManipulator());
-        keyswitchManipulator->addMatrixManipulator('4', "Terrain", new osgGA::TerrainManipulator());
+   //     keyswitchManipulator->addMatrixManipulator('2', "Flight", new osgGA::FlightManipulator());
+  //      keyswitchManipulator->addMatrixManipulator('3', "Drive", new osgGA::DriveManipulator());
+  //      keyswitchManipulator->addMatrixManipulator('4', "Terrain", new osgGA::TerrainManipulator());
 
         std::string pathfile;
         char keyForAnimationPath = '5';
@@ -154,7 +164,7 @@ int main(int argc, char** argv)
     // Make the camera follow the model if the user asked for it
     // int followCamera = atoi(argv[2]);
     // if(followCamera)
-    followTheModel(&viewer, model);
+ //  followTheModel(&viewer, model);
 
     // Set initial position of the camera
     viewer.getCameraManipulator()->setHomePosition( osg::Vec3(0, 600, 800), osg::Vec3(0, 0, 300), osg::Vec3(0, 0, 1),  false );
