@@ -69,7 +69,7 @@ int main(int argc, char** argv)
 
     // Create a PAT which helps in moving the model around
     // Place the PAT at 0,0,0
-    osg::Vec3 newPos(0,0,200);
+    osg::Vec3 newPos(0,0,0);
     osg::PositionAttitudeTransform* pat =  new osg::PositionAttitudeTransform;
     pat->setPosition(newPos);
 

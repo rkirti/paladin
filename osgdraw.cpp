@@ -7,7 +7,9 @@
 #include <osg/Texture>
 
 #include <fstream>
-#include <string.h>
+#include <sstream>
+#include <string>
+#include <cstring>
 #include <iostream>
 
 #include "hud.h"
@@ -175,18 +177,21 @@ osg::ref_ptr<osg::Group> createWalls()
 {
     osg::ref_ptr<osg::Group> grp = new osg::Group;
 
-    ifstream mazeFile;
+    std::ifstream mazeFile;
+    std::ofstream checkFile;
     mazeFile.open("./mazeFiles/mazeTest.txt");
+    checkFile.open("./mazeFiles/mazeTest1.txt");
    // mazeFile.open("./mazeFiles/maze-custom.txt");
-    while (!mazeFile.eof())
+    while (mazeFile.good())
     {   
+            
         float CoMX,CoMY;
         float acCoMX, acCoMY;
         char dir;
         int isXPointing;
-        int halfWidth;
 
-        mazeFile >> CoMX >> CoMY >> halfWidth >> dir;
+        mazeFile >> CoMX >> CoMY >> dir;
+        checkFile << CoMX << "  " << CoMY << "  " << dir << std::endl;
         std::cout << "Read the wall " << CoMX << CoMY << dir << "\n";
 
         acCoMX = CoMX*400 - 2000;
@@ -200,6 +205,8 @@ osg::ref_ptr<osg::Group> createWalls()
         grp->addChild(createWall((int)acCoMX, (int)acCoMY, 200, 10, 500, isXPointing));
     }
 
+    mazeFile.close();
+    checkFile.close();
     // grp->addChild(createWall(0,0,100,5,200,0));
     // grp->addChild(createWall(200,200,200,5,200,1));
     // grp->addChild(createWall(-200,200,200,5,200,1));

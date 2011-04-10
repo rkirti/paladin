@@ -76,7 +76,6 @@ btRigidBody* createRigidBody(btDynamicsWorld *world, float mass, const btTransfo
     btDefaultMotionState* myMotionState = new btDefaultMotionState(startTransform);
     btRigidBody* body = new btRigidBody(mass, myMotionState, shape, localInertia);
     
-    std::cout << "*************** From Rigid body *************" ;
     // myMotionState->setRigidBody(body);
     world->addRigidBody(body);
     return body;
