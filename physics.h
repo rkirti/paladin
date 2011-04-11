@@ -43,6 +43,10 @@ extern btRigidBody* rigidWall;
 extern btRigidBody* rigidModel;
 
 extern osgText::Text* textOne;
+extern osg::ref_ptr<osg::Group> root;
+extern osg::ref_ptr<osg::Switch> QSwitch;
+extern osg::ref_ptr<osg::Projection> QProjection;
+extern bool questionDisplayed;
 
 
 
@@ -85,11 +89,19 @@ class ColliderInfo{
         // Destroy the osg stuff here
         void destroyPowerUp()
         {
+
             if(visible)
             {
+                // Displaty the Question
+                QSwitch->setAllChildrenOn();
+                questionDisplayed = true;
+                
+                
                 puSwitch->setChildValue(puGeode.get(), false);
 
-                hud->IncreementScore();
+                // Score incrementing now done in the keyboard handler if
+                // correct key is pressed
+            //    hud->IncreementScore();
                 visible = false;
             }
         }

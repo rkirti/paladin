@@ -218,18 +218,21 @@ if __name__ == "__main__":
   try:
     if n_rows > 0:
       dim=int(sys.argv[1])
-      print Maze( n_rows, n_cols )
       maze=Maze(n_rows,n_cols)
+      print maze 
+      print maze.maze
       for j in range(dim):
-        print repr(j+0.5)  + "  0  " + "Y"
+        print repr(j+0.5)  + "  0  " + "X"
       for i in range(dim):
-        print "0  " + repr(i + 0.5) + "  X"
-        for j in range(dim):
-          if i == dim-1 or maze.maze[i][j][RIGHTWALL]:
-            print repr(i) + "  " + repr(j+0.5) + "  X"
-        for j in range(dim):
-          if i == dim-1 or maze.maze[i][j][BOTTOMWALL]:
-            print repr(i+0.5) + "  " + repr(j) + "  Y"
+        print "0  " + repr(i + 0.5) + "  Y"
+
+      for j in range(dim):
+        for i in range(dim):
+          if maze.maze[j][i][RIGHTWALL]:
+            print repr(i+1) +  "  " + repr(j+0.5) + "  Y"
+        for i in range(dim):
+          if maze.maze[j][i][BOTTOMWALL]:
+            print repr(i+0.5) + "  " + repr(j+1) + "  X"
     else:
       maze = Maze( abs(n_rows), abs(n_cols) )
       print maze.as_html_table()

@@ -19,6 +19,13 @@
 using std::ifstream;
 
 extern HUDElement* hud;; 
+extern osgText::Text* textOne;
+extern osg::ref_ptr<osg::Group> root;
+extern osg::ref_ptr<osg::Switch> QSwitch;
+extern osg::ref_ptr<osg::Projection> QProjection;
+extern bool questionDisplayed;
+
+
 
 // osg::ref_ptr<osg::Switch> powerUpSwitch; 
 osg::ref_ptr<osg::Geode> basicShapesGeode; 
@@ -179,9 +186,7 @@ osg::ref_ptr<osg::Group> createWalls()
 
     std::ifstream mazeFile;
     std::ofstream checkFile;
-    mazeFile.open("./mazeFiles/mazeTest.txt");
-    checkFile.open("./mazeFiles/mazeTest1.txt");
-   // mazeFile.open("./mazeFiles/maze-custom.txt");
+    mazeFile.open("mazeTest3.txt");
     while (mazeFile.good())
     {   
             
@@ -189,27 +194,29 @@ osg::ref_ptr<osg::Group> createWalls()
         float acCoMX, acCoMY;
         char dir;
         int isXPointing;
+        int halfWidth;
 
         mazeFile >> CoMX >> CoMY >> dir;
-        checkFile << CoMX << "  " << CoMY << "  " << dir << std::endl;
         std::cout << "Read the wall " << CoMX << CoMY << dir << "\n";
 
         acCoMX = CoMX*400 - 2000;
-        acCoMY = CoMY*400 - 2000;
+        acCoMY = (10-CoMY)*400 - 2000;
         
         if (dir == 'X') isXPointing = 1;
         else isXPointing = 0;
         
         std::cout << "Creating the wall " << acCoMX << acCoMY << "  " <<  isXPointing << std::endl;
-
-        grp->addChild(createWall((int)acCoMX, (int)acCoMY, 200, 10, 500, isXPointing));
+        grp->addChild(createWall(acCoMX, acCoMY, 200, 10, 500, isXPointing));
     }
 
     mazeFile.close();
     checkFile.close();
-    // grp->addChild(createWall(0,0,100,5,200,0));
-    // grp->addChild(createWall(200,200,200,5,200,1));
-    // grp->addChild(createWall(-200,200,200,5,200,1));
+    // Border walls dont seem to work right now, so adding them temporarily this
+    // way
+    grp->addChild(createWall(2200,0,2200,10,500,1));
+    grp->addChild(createWall(-2200,0,2200,10,500,1));
+    grp->addChild(createWall(0,2200,2200,10,500,0));
+    grp->addChild(createWall(0,-2200,2200,10,500,0));
 
     return grp;
 }
@@ -248,14 +255,39 @@ osg::ref_ptr<osg::Switch> createPowerUp(int x, int y, int z)
     swt->addChild(geode.get(), true);
 
 
-    drawable->setColor(osg::Vec4(1,0,0,1));
+ //   drawable->setColor(osg::Vec4(1,0,0,1));
 
     // Rigid body
     createRigidPowerUp(btVector3(x,y,z), rad, swt, geode);
 
+    // Add textures, make it look good
+    osg::Texture2D* puTexture = new osg::Texture2D;
+    puTexture->setDataVariance(osg::Object::DYNAMIC);
+    // Read the texture image
+    osg::Image* teximage = osgDB::readImageFile("data/puTexture.png");
+    if (!teximage)
+    {
+        std:: cout << "Texture not found, quitting." << std::endl;
+        exit(0);
+    }
+
+    puTexture->setImage(teximage);
+
+    // Declare a state for the blend texture mode
+    osg::StateSet* blendStateSet = new osg::StateSet();
+
+   // Declare a TexEnv instance, set the mode to 'BLEND'
+   osg::TexEnv* blendTexEnv = new osg::TexEnv;
+   blendTexEnv->setMode(osg::TexEnv::BLEND);
+   blendStateSet->setTextureAttributeAndModes(0,puTexture,osg::StateAttribute::ON);
+   blendStateSet->setTextureAttribute(0,blendTexEnv);
+   geode->setStateSet(blendStateSet);
     return swt;
 
 }
+
+
+
 
 osg::ref_ptr<osg::Group> createPowerUps()
 {
@@ -320,7 +352,24 @@ bool AnimationToggleHandler::handle(const osgGA::GUIEventAdapter& ea, osgGA::GUI
 {
     osgViewer::Viewer* viewer = dynamic_cast<osgViewer::Viewer*>(&aa);
     if (!viewer) return false;
+    if (questionDisplayed) 
+    {
+        if ((ea.getKey() == '1') || (ea.getKey() == '2') )
+        {
+            questionDisplayed=false;
+            QSwitch->setChildValue(QProjection,false);
+            hud->IncreementScore();
 
+        }
+
+
+        else
+        {
+            model->clearCycle(currentAnimation,0.0);
+            palPos->stopAdvance();
+            return false;
+        }
+    }
     switch(ea.getEventType())
     {
         case(osgGA::GUIEventAdapter::KEYDOWN):

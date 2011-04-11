@@ -33,6 +33,10 @@
 
 HUDElement* hud;; 
 
+osg::ref_ptr<osg::Group> root;
+osg::ref_ptr<osg::Switch> QSwitch;
+osg::ref_ptr<osg::Projection> QProjection;
+bool questionDisplayed=false;
 
 int main(int argc, char** argv)
 {
@@ -49,7 +53,7 @@ int main(int argc, char** argv)
     osgViewer::Viewer viewer(arguments);
 
     // Create a root node for the scene graph
-    osg::ref_ptr<osg::Group> root = new osg::Group;
+    root = new osg::Group;
 
     // Skybox
     root->addChild(createSkyBox());
@@ -59,12 +63,10 @@ int main(int argc, char** argv)
     root->addChild(theFloor);
 
     // Ceiling
-   // osg::ref_ptr<osg::Group> theCeiling = createCeiling("data/ceiling.png");
-   // root->addChild(theCeiling);
+ // osg::ref_ptr<osg::Group> theCeiling = createCeiling("data/ceiling.png");
+ // root->addChild(theCeiling);
 
-
-
-    // Model
+        // Model
     osg::ref_ptr<osgCal::Model> model = createModel(argv[1]);
 
     // Create a PAT which helps in moving the model around
@@ -78,6 +80,24 @@ int main(int argc, char** argv)
 
     // Add pat to the root
     root->addChild(pat);
+
+
+    // Reading the Chalice node
+    osg::ref_ptr<osg::Node> cauldronNode = osgDB::readNodeFile("cauldron.osg");
+    osg::PositionAttitudeTransform* cessnaPat = new osg::PositionAttitudeTransform();
+    cessnaPat->setPosition(osg::Vec3(800,950,50));
+    osg::MatrixTransform* mScale  = new osg::MatrixTransform();
+    mScale->setMatrix(osg::Matrixd::scale(10,10,10));
+    root->addChild(cessnaPat);
+    cessnaPat->addChild(mScale);
+    mScale->addChild(cauldronNode);
+
+    // Add the HUD for the question. Keep it under a switch
+    // so that its invisible for now
+    QSwitch = new osg::Switch();
+    QProjection = displayQuestion();
+    root->addChild(QSwitch);
+    QSwitch->addChild(QProjection, false);
 
     // init physics
     createPhysicsWorld();
@@ -164,7 +184,7 @@ int main(int argc, char** argv)
     // Make the camera follow the model if the user asked for it
     // int followCamera = atoi(argv[2]);
     // if(followCamera)
- //  followTheModel(&viewer, model);
+    followTheModel(&viewer, model);
 
     // Set initial position of the camera
     viewer.getCameraManipulator()->setHomePosition( osg::Vec3(0, 600, 800), osg::Vec3(0, 0, 300), osg::Vec3(0, 0, 1),  false );

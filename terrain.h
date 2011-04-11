@@ -48,7 +48,7 @@ osg::ref_ptr<osg::Group> createTerrain(const std::string filename)
     osg::ref_ptr<osg::Group> grp = new osg::Group;
 
     int i, j;
-    int dim = 10;
+    int dim = 11;
 
     for(i=-dim; i<=dim; i++)
     {

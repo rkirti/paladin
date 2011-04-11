@@ -14,6 +14,8 @@
 #include <osgText/Text>
 #include <string>
 
+enum OPTIONS{OPTION_A=1,OPTION_B=2, OPTION_C=3, OPTION_D=4};
+osg::Projection* displayQuestion();
 
 class HUDElement
 {
@@ -55,6 +57,28 @@ class HUDElement
         int score;
         int mPosX;
         int mPosY;
+};
+
+
+
+class Question{
+    public:
+    std::string  qText;
+    std::string option1;
+    std::string option2;
+    std::string option3;
+    std::string option4;
+    OPTIONS correctAnswer;   
+    Question(std::string question, std::string ans1, std::string ans2, std::string ans3, std::string ans4, OPTIONS sol)
+    {
+        qText = question;
+        option1 = ans1;
+        option2 = ans2;
+        option3 = ans3;
+        option4 = ans4;
+        correctAnswer = sol;
+    }
+
 };
 
 #endif

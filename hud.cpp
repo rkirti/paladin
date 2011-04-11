@@ -219,6 +219,82 @@ void HUDElement::DisplayInitScreen()
 }
 
 
+osg::Projection* displayQuestion()
+{
+   osg::Geode* QGeode = new osg::Geode();
+   osgText::Text* Qtext = new osgText::Text();
+
+   osg::Projection* QProjectionMatrix = new osg::Projection;
+   QProjectionMatrix->setMatrix(osg::Matrix::ortho2D(0,1024,0,768));
+
+   osg::MatrixTransform* QModelViewMatrix = new osg::MatrixTransform;
+   QModelViewMatrix->setReferenceFrame(osg::Transform::ABSOLUTE_RF);
+   QModelViewMatrix->setMatrix(osg::Matrix::identity());
+
+   QProjectionMatrix->addChild(QModelViewMatrix);
+   QModelViewMatrix->addChild( QGeode );
+   QGeode->addDrawable( Qtext );
+
+   Qtext->setCharacterSize(20);
+   Qtext->setFont("data/impact.ttf");
+   Qtext->setText("Functions can be declared with default values in parameters. We use default keyword to specify the value of such parameters.\n a) True \n b) False");
+   Qtext->setAxisAlignment(osgText::Text::SCREEN);
+   Qtext->setPosition( osg::Vec3(400,400,0) );
+   Qtext->setColor( osg::Vec4(199,77,15,1) );
+
+   osg::Geometry* QBackgroundGeometry = new osg::Geometry();
+
+   osg::Vec3Array* QBackgroundVertices = new osg::Vec3Array;
+   QBackgroundVertices->push_back( osg::Vec3(   60,200,-1) );
+   QBackgroundVertices->push_back( osg::Vec3(60,  600,-1) );
+   QBackgroundVertices->push_back( osg::Vec3(860,600,-1) );
+   QBackgroundVertices->push_back( osg::Vec3( 860,200,-1) );
+
+   osg::DrawElementsUInt* QBackgroundIndices = 
+      new osg::DrawElementsUInt(osg::PrimitiveSet::POLYGON, 0);
+   QBackgroundIndices->push_back(0);
+   QBackgroundIndices->push_back(1);
+   QBackgroundIndices->push_back(2);
+   QBackgroundIndices->push_back(3);
+
+   osg::Vec4Array* Qcolors = new osg::Vec4Array;
+   Qcolors->push_back(osg::Vec4(0.8f,0.8f,0.8f,0.25f));
+
+   osg::Vec2Array* texcoords = new osg::Vec2Array(4);
+   (*texcoords)[0].set(0.0f,0.0f);
+   (*texcoords)[1].set(1.0f,0.0f);
+   (*texcoords)[2].set(1.0f,1.0f);
+   (*texcoords)[3].set(0.0f,1.0f);
+   QBackgroundGeometry->setTexCoordArray(0,texcoords);
+
+   // set up the texture state.    
+   osg::Texture2D* QTexture = new osg::Texture2D;
+   // protect from being optimized away as static state.
+   QTexture->setDataVariance(osg::Object::DYNAMIC); 
+   QTexture->setImage(osgDB::readImageFile("data/texture.tga"));
+
+   osg::Vec3Array* Qnormals = new osg::Vec3Array;
+   Qnormals->push_back(osg::Vec3(0.0f,0.0f,1.0f));
+   QBackgroundGeometry->setNormalArray(Qnormals);
+   QBackgroundGeometry->setNormalBinding(osg::Geometry::BIND_OVERALL);
+
+   QGeode->addDrawable(QBackgroundGeometry);
+   QBackgroundGeometry->addPrimitiveSet(QBackgroundIndices);
+   QBackgroundGeometry->setVertexArray(QBackgroundVertices);
+   QBackgroundGeometry->setColorArray(Qcolors);
+   QBackgroundGeometry->setColorBinding(osg::Geometry::BIND_OVERALL);
+
+   osg::StateSet* QStateSet = new osg::StateSet(); 
+   QGeode->setStateSet(QStateSet);
+   QStateSet->setRenderBinDetails( 11, "RenderBin");
+   QStateSet->setMode(GL_BLEND,osg::StateAttribute::ON);
+   QStateSet->setMode(GL_DEPTH_TEST,osg::StateAttribute::OFF);
+   QStateSet->setRenderingHint( osg::StateSet::TRANSPARENT_BIN );
+   QStateSet->setTextureAttributeAndModes(0,QTexture,osg::StateAttribute::ON);
+    return QProjectionMatrix;
+
+}
+
 void HUDElement::RemoveInitScreen()
 {
     swt->setChildValue(HUDGeode, false);
