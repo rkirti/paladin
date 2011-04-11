@@ -13,6 +13,10 @@
 
 #include <osgText/Text>
 #include <string>
+#include <cstring>
+#include <cstdlib>
+#include <fstream>
+#include <iostream>
 
 enum OPTIONS{OPTION_A=1,OPTION_B=2, OPTION_C=3, OPTION_D=4};
 osg::Projection* displayQuestion();
@@ -78,7 +82,48 @@ class Question{
         option4 = ans4;
         correctAnswer = sol;
     }
+    Question(){} // Empty constructor needed as well
 
+};
+
+class QuestionBank{
+public:
+    std::vector<Question> bank;
+    int numQuestions;
+    void readQuestions(std::string qFileName)
+    {
+        std::ifstream qFile;
+        int ctr=0;
+        qFile.open(qFileName.c_str());
+        if (!qFile.good())
+        {
+            std::cout << "Couldn't read the questions file. Exiting" << std::endl;
+            exit(0);
+        }
+
+        for (ctr=0;ctr<numQuestions;ctr++)
+        {
+            Question tempQ;
+            int temp;
+            getline(qFile,tempQ.qText);
+            getline(qFile,tempQ.option1);
+            getline(qFile,tempQ.option2);
+            getline(qFile,tempQ.option3);
+            getline(qFile,tempQ.option4);
+            qFile >> temp;
+            tempQ.correctAnswer = (OPTIONS)temp;
+            bank.push_back(tempQ);
+        }
+        // To verify, temporarily:
+         for (ctr=0;ctr<numQuestions;ctr++)
+        {
+            std::cout <<  bank[ctr].qText << std::endl;
+            std::cout <<  bank[ctr].option1 << std::endl;
+        }
+        
+         qFile.close();
+        return;
+    }
 };
 
 #endif

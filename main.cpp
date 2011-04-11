@@ -37,9 +37,12 @@ osg::ref_ptr<osg::Group> root;
 osg::ref_ptr<osg::Switch> QSwitch;
 osg::ref_ptr<osg::Projection> QProjection;
 bool questionDisplayed=false;
+QuestionBank gBank;
 
 int main(int argc, char** argv)
 {
+    gBank.readQuestions(std::string("questions.txt"));
+
     if(argc < 2)
     {
         std::cout << "Usage: "<< argv[0]<<" path_to_cal3d.cfg \n";

@@ -3,6 +3,10 @@
 #include <sstream>
 #include <osg/Switch>
 
+Question tempQ("This is a temp question","OptionA", "OptionB", "OptionC", "OptionD", OPTION_C);
+
+
+
 HUDElement::HUDElement(osg::Group* root, int width, int height)
 {
     mHUDProjectionMatrix = new osg::Projection();
@@ -182,7 +186,7 @@ void HUDElement::DisplayInitScreen()
     HUDTexture->setDataVariance(osg::Object::DYNAMIC);
     osg::Image* hudImage;
     hudImage = osgDB::readImageFile("data/initscreen.png");
-    if (!hudImage) std::cout << "Couldnt read init screen image" << std::endl;
+ //   if (!hudImage) std::cout << "Couldnt read init screen image" << std::endl;
     HUDTexture->setImage(hudImage);
     osg::Vec3Array* HUDnormals = new osg::Vec3Array;
     HUDnormals->push_back(osg::Vec3(0.0f,0.0f,1.0f));
@@ -237,7 +241,7 @@ osg::Projection* displayQuestion()
 
    Qtext->setCharacterSize(20);
    Qtext->setFont("data/impact.ttf");
-   Qtext->setText("Functions can be declared with default values in parameters. We use default keyword to specify the value of such parameters.\n a) True \n b) False");
+   Qtext->setText(tempQ.qText + "\n" + tempQ.option1 + "\n" + tempQ.option2);
    Qtext->setAxisAlignment(osgText::Text::SCREEN);
    Qtext->setPosition( osg::Vec3(400,400,0) );
    Qtext->setColor( osg::Vec4(199,77,15,1) );

@@ -29,7 +29,7 @@
 
 #include "hud.h"
 
-extern HUDElement* hud;; 
+extern HUDElement* hud;
 
 enum collider_type{POWER_UP,WALL};
 typedef enum collider_type COLLIDER_TYPE;
